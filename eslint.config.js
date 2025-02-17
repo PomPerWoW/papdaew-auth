@@ -22,6 +22,10 @@ export default [
     },
     settings: {
       'import/resolver': {
+        alias: {
+          map: [['@auth', './src']],
+          extensions: ['.js', '.json'],
+        },
         node: {
           extensions: ['.js'],
         },
