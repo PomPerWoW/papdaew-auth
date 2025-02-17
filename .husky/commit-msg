@@ -1,4 +1,4 @@
-# services/auth/.husky/commit-msg
+# services/papdaew-auth/.husky/commit-msg
 
 echo "🔍 (Auth) Checking commit message format..."
 

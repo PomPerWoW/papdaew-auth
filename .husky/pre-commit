@@ -1,9 +1,6 @@
-# services/auth/.husky/pre-commit
+# services/papdaew-auth/.husky/pre-commit
 
 echo "🔍 (Auth) Running pre-commit checks..."
-
-# Change to the auth service directory
-cd services/auth
 
 # Run lint checks
 echo "\n🎨 Running lint checks..."
