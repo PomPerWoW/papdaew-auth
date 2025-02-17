@@ -1,0 +1,49 @@
+{
+	"name": "papdaew-auth-service",
+	"version": "1.0.0",
+	"type": "module",
+	"description": "Authentication service",
+	"main": "src/server.js",
+	"scripts": {
+		"start": "pm2 start src/server.js -i 5 --attach --watch",
+		"stop": "pm2 stop all",
+		"delete": "pm2 delete all",
+		"dev": "nodemon -r esm-module-alias/loader src/server.js | pino-pretty --colorize",
+		"lint:check": "eslint 'src/**/*.js'",
+		"lint:fix": "eslint 'src/**/*.js' --fix",
+		"format:check": "prettier --check 'src/**/*.{js,json}'",
+		"format:fix": "prettier --write 'src/**/*.{js,json}'",
+		"test": "jest --coverage=true -w=1 --forceExit --detectOpenHandles --watchAll=false",
+		"prepare": "husky"
+	},
+	"author": "Papdaew",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/PomPerWoW/papdaew-auth.git"
+	},
+	"bugs": {
+		"url": "https://github.com/PomPerWoW/papdaew-auth/issues"
+	},
+	"homepage": "https://github.com/PomPerWoW/papdaew-auth#readme",
+	"dependencies": {
+		"cors": "^2.8.5",
+		"dotenv": "^16.4.7",
+		"esm-module-alias": "^2.2.1",
+		"express": "^4.21.2",
+		"pino": "^9.6.0",
+		"pm2": "^5.4.3"
+	},
+	"devDependencies": {
+		"@eslint/js": "^9.20.0",
+		"eslint": "^9.20.1",
+		"eslint-config-prettier": "^10.0.1",
+		"eslint-plugin-import": "^2.31.0",
+		"eslint-plugin-prettier": "^5.2.3",
+		"globals": "^15.15.0",
+		"husky": "^9.1.7",
+		"jest": "^29.7.0",
+		"nodemon": "^3.1.9",
+		"pino-pretty": "^13.0.0",
+		"prettier": "^3.5.1"
+	}
+}
