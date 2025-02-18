@@ -16,7 +16,7 @@ npm run format:check || {
     exit 1
 }
 
-Run tests
+# Run tests
 echo "\n🧪 Running tests..."
 npm test || {
     echo "❌ Tests failed. Please fix the failing tests and try committing again."
