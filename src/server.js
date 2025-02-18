@@ -1,17 +1,56 @@
-import express from 'express';
+const http = require('http');
 
-import { config } from '@auth/config.js';
-import routes from '@auth/routes/routes.js';
-import Logger from '@auth/utils/logger/logger.utils.js';
+const express = require('express');
 
-const app = express();
-const logger = new Logger('Auth Server');
+const { config } = require('#auth/config.js');
+const { healthRoutes } = require('#auth/routes/health.routes.js');
+const Logger = require('#auth/utils/logger/logger.utils.js');
 
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+class AuthServer {
+  #app;
+  #logger;
 
-app.use('/api/v1', routes);
+  constructor() {
+    this.#app = express();
+    this.#logger = new Logger('Auth Server');
+  }
 
-app.listen(config.PORT, () => {
-  logger.info(`Auth service is running on port ${config.PORT}`);
-});
+  setup() {
+    this.#setupMiddleware(this.#app);
+    this.#setupRoutes(this.#app);
+    return this.#app;
+  }
+
+  start() {
+    this.setup();
+    this.#startServer(this.#app);
+  }
+
+  #setupMiddleware(app) {
+    app.use(express.json());
+    app.use(express.urlencoded({ extended: true }));
+  }
+
+  #setupRoutes(app) {
+    app.use('', healthRoutes);
+  }
+
+  async #startServer(app) {
+    try {
+      await this.#startHttpServer(app);
+    } catch (error) {
+      this.#logger.error(error);
+      process.exit(1);
+    }
+  }
+
+  async #startHttpServer(app) {
+    const server = http.createServer(app);
+
+    server.listen(config.PORT, () => {
+      this.#logger.info(`Auth service is running on port ${config.PORT}`);
+    });
+  }
+}
+
+module.exports = AuthServer;

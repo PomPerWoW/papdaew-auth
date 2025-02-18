@@ -1,14 +1,14 @@
-import js from '@eslint/js';
-import prettier from 'eslint-config-prettier';
-import importPlugin from 'eslint-plugin-import';
-import eslintPluginPrettier from 'eslint-plugin-prettier';
-import globals from 'globals';
+const js = require('@eslint/js');
+const prettier = require('eslint-config-prettier');
+const importPlugin = require('eslint-plugin-import');
+const eslintPluginPrettier = require('eslint-plugin-prettier');
+const globals = require('globals');
 
-export default [
+module.exports = [
   {
     languageOptions: {
       ecmaVersion: 2022,
-      sourceType: 'module',
+      sourceType: 'commonjs',
       globals: {
         ...globals.node,
         ...globals.jest,
@@ -23,7 +23,7 @@ export default [
     settings: {
       'import/resolver': {
         alias: {
-          map: [['@auth', './src']],
+          map: [['#auth', './src']],
           extensions: ['.js', '.json'],
         },
         node: {
@@ -47,7 +47,7 @@ export default [
           ],
           pathGroups: [
             {
-              pattern: '@auth/**',
+              pattern: '#auth/**',
               group: 'internal',
               position: 'after',
             },

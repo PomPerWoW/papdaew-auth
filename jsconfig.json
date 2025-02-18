@@ -1,9 +1,0 @@
-{
-  "compilerOptions": {
-    "baseUrl": ".",
-    "paths": {
-      "@auth/*": ["src/*"]
-    }
-  },
-  "exclude": ["node_modules", "dist"]
-}
