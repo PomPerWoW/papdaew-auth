@@ -1,14 +1,10 @@
 const http = require('http');
 
+const { errors, logger } = require('@papdaew/shared');
 const express = require('express');
 
 const { config } = require('#auth/config.js');
-const {
-  NotFoundError,
-  globalErrorHandler,
-} = require('#auth/middlewares/errors.middleware.js');
 const { healthRoutes } = require('#auth/routes/health.routes.js');
-const Logger = require('#auth/utils/logger/logger.utils.js');
 
 class AuthServer {
   #app;
@@ -16,7 +12,12 @@ class AuthServer {
 
   constructor() {
     this.#app = express();
-    this.#logger = new Logger('Auth Server');
+    this.#logger = new logger({
+      name: 'Auth Server',
+      level: process.env.LOG_LEVEL || 'info',
+      serviceVersion: process.env.SERVICE_VERSION || '1.0.0',
+      environment: process.env.NODE_ENV || 'development',
+    });
   }
 
   setup() {
@@ -45,13 +46,13 @@ class AuthServer {
       const fullUrl = `${req.protocol}://${req.get('host')}${req.originalUrl}`;
       this.#logger.error(`${fullUrl} endpoint does not exist.`);
       next(
-        new NotFoundError(
+        new errors.NotFoundError(
           `Can't find ${req.method}:${req.originalUrl} on this server!`
         )
       );
     });
 
-    this.#app.use(globalErrorHandler);
+    this.#app.use(errors.globalErrorHandler);
   }
 
   async #startServer(app) {
