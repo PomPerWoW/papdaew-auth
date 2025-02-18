@@ -1,4 +1,4 @@
-const { AuthServer } = require('#auth/server.js');
+const AuthServer = require('#auth/server.js');
 
 class Application {
   constructor() {

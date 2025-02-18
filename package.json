@@ -9,7 +9,7 @@
     "stop": "pm2 stop all",
     "delete": "pm2 delete all",
     "dev": "nodemon src/app.js",
-    "test": "jest --coverage",
+    "test": "NODE_ENV=test jest --coverage=true -w=1 --forceExit --detectOpenHandles --watchAll=false",
     "lint:check": "eslint 'src/**/*.js'",
     "lint:fix": "eslint 'src/**/*.js' --fix",
     "format:check": "prettier --check 'src/**/*.{js,json}'",

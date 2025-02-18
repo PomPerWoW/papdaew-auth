@@ -2,6 +2,16 @@ const pino = require('pino');
 
 class Logger {
   constructor(name) {
+    if (process.env.NODE_ENV === 'test') {
+      this.logger = {
+        info: () => {},
+        error: () => {},
+        warn: () => {},
+        debug: () => {},
+      };
+      return;
+    }
+
     this.logger = pino({
       name,
       transport: {

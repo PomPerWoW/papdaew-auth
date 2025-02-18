@@ -15,14 +15,14 @@ class AuthServer {
     this.#logger = new Logger('Auth Server');
   }
 
-  setupApp() {
+  setup() {
     this.#setupMiddleware(this.#app);
     this.#setupRoutes(this.#app);
     return this.#app;
   }
 
   start() {
-    this.setupApp();
+    this.setup();
     this.#startServer(this.#app);
   }
 
@@ -53,4 +53,4 @@ class AuthServer {
   }
 }
 
-module.exports = { AuthServer };
+module.exports = AuthServer;

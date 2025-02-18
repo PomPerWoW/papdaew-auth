@@ -1,4 +1,4 @@
-const HttpStatus = require('http-status-codes');
+const { StatusCodes } = require('http-status-codes');
 
 const Logger = require('#auth/utils/logger/logger.utils.js');
 
@@ -7,13 +7,13 @@ class HealthController {
 
   getHealth = async (req, res) => {
     this.#logger.info('GET: /health');
-    res.status(HttpStatus.OK).send('Auth service is healthy and OK');
+    res.status(StatusCodes.OK).send('Auth service is healthy and OK');
   };
 
   error = async (req, res) => {
     this.#logger.error('GET: /error');
     res
-      .status(HttpStatus.INTERNAL_SERVER_ERROR)
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
       .send('Auth service is unhealthy');
   };
 }
