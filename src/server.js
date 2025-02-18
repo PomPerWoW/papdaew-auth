@@ -1,17 +1,50 @@
+import http from 'http';
+
 import express from 'express';
+import { Server } from 'socket.io';
 
 import { config } from '@auth/config.js';
-import routes from '@auth/routes/routes.js';
+import { healthRoutes } from '@auth/routes/health.routes.js';
 import Logger from '@auth/utils/logger/logger.utils.js';
 
-const app = express();
-const logger = new Logger('Auth Server');
+class AuthServer {
+  constructor() {
+    this.app = express();
+    this.server = http.createServer(this.app);
+    this.io = new Server(this.server);
+    this.logger = new Logger('Auth Server');
 
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+    this.setupMiddleware();
+    this.setupRoutes();
+    this.setupSocketEvents();
+  }
 
-app.use('/api/v1', routes);
+  setupMiddleware() {
+    this.app.use(express.json());
+    this.app.use(express.urlencoded({ extended: true }));
+  }
 
-app.listen(config.PORT, () => {
-  logger.info(`Auth service is running on port ${config.PORT}`);
-});
+  setupRoutes() {
+    this.app.use('', healthRoutes);
+  }
+
+  setupSocketEvents() {
+    this.io.on('connection', socket => {
+      this.logger.info(`Client connected: ${socket.id}`);
+
+      socket.on('disconnect', () => {
+        this.logger.info(`Client disconnected: ${socket.id}`);
+      });
+    });
+  }
+
+  start() {
+    this.server.listen(config.PORT, () => {
+      this.logger.info(`Auth service is running on port ${config.PORT}`);
+    });
+  }
+}
+
+// Create and start the server
+const authServer = new AuthServer();
+authServer.start();
