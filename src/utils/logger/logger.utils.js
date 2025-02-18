@@ -1,4 +1,4 @@
-import pino from 'pino';
+const pino = require('pino');
 
 class Logger {
   constructor(name) {
@@ -31,4 +31,4 @@ class Logger {
   }
 }
 
-export default Logger;
+module.exports = Logger;

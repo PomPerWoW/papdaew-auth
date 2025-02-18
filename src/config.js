@@ -1,4 +1,4 @@
-import dotenv from 'dotenv';
+const dotenv = require('dotenv');
 
 dotenv.config({ path: '.env' });
 
@@ -9,4 +9,4 @@ class Config {
   }
 }
 
-export const config = new Config();
+module.exports = { config: new Config() };

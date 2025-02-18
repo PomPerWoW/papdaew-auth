@@ -1,50 +1,56 @@
-import http from 'http';
+const http = require('http');
 
-import express from 'express';
-import { Server } from 'socket.io';
+const express = require('express');
 
-import { config } from '@auth/config.js';
-import { healthRoutes } from '@auth/routes/health.routes.js';
-import Logger from '@auth/utils/logger/logger.utils.js';
+const { config } = require('#auth/config.js');
+const { healthRoutes } = require('#auth/routes/health.routes.js');
+const Logger = require('#auth/utils/logger/logger.utils.js');
 
 class AuthServer {
+  #app;
+  #logger;
+
   constructor() {
-    this.app = express();
-    this.server = http.createServer(this.app);
-    this.io = new Server(this.server);
-    this.logger = new Logger('Auth Server');
-
-    this.setupMiddleware();
-    this.setupRoutes();
-    this.setupSocketEvents();
+    this.#app = express();
+    this.#logger = new Logger('Auth Server');
   }
 
-  setupMiddleware() {
-    this.app.use(express.json());
-    this.app.use(express.urlencoded({ extended: true }));
-  }
-
-  setupRoutes() {
-    this.app.use('', healthRoutes);
-  }
-
-  setupSocketEvents() {
-    this.io.on('connection', socket => {
-      this.logger.info(`Client connected: ${socket.id}`);
-
-      socket.on('disconnect', () => {
-        this.logger.info(`Client disconnected: ${socket.id}`);
-      });
-    });
+  setupApp() {
+    this.#setupMiddleware(this.#app);
+    this.#setupRoutes(this.#app);
+    return this.#app;
   }
 
   start() {
-    this.server.listen(config.PORT, () => {
-      this.logger.info(`Auth service is running on port ${config.PORT}`);
+    this.setupApp();
+    this.#startServer(this.#app);
+  }
+
+  #setupMiddleware(app) {
+    app.use(express.json());
+    app.use(express.urlencoded({ extended: true }));
+  }
+
+  #setupRoutes(app) {
+    app.use('', healthRoutes);
+  }
+
+  async #startServer(app) {
+    try {
+      await this.#startHttpServer(app);
+    } catch (error) {
+      this.#logger.error(error);
+      process.exit(1);
+    }
+  }
+
+  async #startHttpServer(app) {
+    const server = http.createServer(app);
+
+    server.listen(config.PORT, () => {
+      this.#logger.info(`Auth service is running on port ${config.PORT}`);
     });
   }
 }
 
-// Create and start the server
-const authServer = new AuthServer();
-authServer.start();
+module.exports = { AuthServer };
