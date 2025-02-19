@@ -3,13 +3,13 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 
 const { config } = require('#auth/config.js');
-const database = require('#auth/database.js');
+const Database = require('#auth/database.js');
 
 class AuthService {
   #database;
 
   constructor() {
-    this.#database = database;
+    this.#database = new Database();
   }
 
   #generateToken = user =>

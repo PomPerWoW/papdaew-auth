@@ -9,6 +9,10 @@ class Database {
   #logger;
 
   constructor() {
+    if (Database.#instance) {
+      return Database.#instance;
+    }
+
     this.#prisma = new PrismaClient({
       log: [
         { level: 'warn', emit: 'event' },
@@ -25,13 +29,6 @@ class Database {
 
     this.#setupLogging();
     Database.#instance = this;
-  }
-
-  static getInstance() {
-    if (!Database.#instance) {
-      Database.#instance = new Database();
-    }
-    return Database.#instance;
   }
 
   #setupLogging = () => {
@@ -64,4 +61,4 @@ class Database {
   }
 }
 
-module.exports = Database.getInstance();
+module.exports = Database;

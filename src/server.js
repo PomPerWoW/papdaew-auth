@@ -11,18 +11,15 @@ const helmet = require('helmet');
 const hpp = require('hpp');
 
 const { config } = require('#auth/config.js');
-const database = require('#auth/database.js');
 const { authRoutes } = require('#auth/routes/auth.routes.js');
 const { healthRoutes } = require('#auth/routes/health.routes.js');
 
 class AuthServer {
   #app;
   #logger;
-  #database;
 
   constructor() {
     this.#app = express();
-    this.#database = database;
     this.#logger = new PinoLogger({
       name: 'Auth Server',
       level: config.LOG_LEVEL,
@@ -77,7 +74,6 @@ class AuthServer {
 
   async #startServer(app) {
     try {
-      await this.#database.connect();
       this.#startHttpServer(app);
     } catch (error) {
       this.#logger.error('Failed to start server', error);
@@ -99,9 +95,11 @@ class AuthServer {
       });
     });
 
-    process.on('unhandledRejection', (reason, promise, error) => {
-      this.#logger.error('Unhandled Rejection at:', promise, 'reason:', reason);
-      this.#logger.error(`Error (${error.name}): - ${error.message}`);
+    process.on('unhandledRejection', error => {
+      this.#logger.error(
+        'Unhandled Rejection:',
+        `${error.name}: ${error.message}`
+      );
       server.close(() => {
         process.exit(1);
       });
@@ -109,7 +107,6 @@ class AuthServer {
 
     process.on('SIGTERM', async () => {
       this.#logger.info('SIGTERM signal received: closing HTTP server');
-      this.#database.disconnect();
       server.close(() => {
         this.#logger.info('HTTP server closed');
       });
