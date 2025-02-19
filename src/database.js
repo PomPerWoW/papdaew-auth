@@ -3,7 +3,8 @@ const { PrismaClient } = require('@prisma/client');
 
 const config = require('#auth/config.js');
 
-class DatabaseService {
+class Database {
+  static #instance;
   #prisma;
   #logger;
 
@@ -16,28 +17,32 @@ class DatabaseService {
     });
 
     this.#logger = new PinoLogger({
-      name: 'Database Service',
+      name: 'Database',
       level: config.LOG_LEVEL,
       serviceVersion: config.SERVICE_VERSION,
       environment: config.NODE_ENV,
     });
 
     this.#setupLogging();
+    Database.#instance = this;
+  }
+
+  static getInstance() {
+    if (!Database.#instance) {
+      Database.#instance = new Database();
+    }
+    return Database.#instance;
   }
 
   #setupLogging = () => {
-    this.#prisma.$on('error', e => {
-      this.#logger.error('Prisma Client error', e);
-    });
-
     this.#prisma.$on('warn', e => {
       this.#logger.warn('Prisma Client warning', e);
     });
-  };
 
-  get prisma() {
-    return this.#prisma;
-  }
+    this.#prisma.$on('error', e => {
+      this.#logger.error('Prisma Client error', e);
+    });
+  };
 
   connect = async () => {
     try {
@@ -53,6 +58,10 @@ class DatabaseService {
     await this.#prisma.$disconnect();
     this.#logger.info('Disconnected from database');
   };
+
+  get prisma() {
+    return this.#prisma;
+  }
 }
 
-module.exports = new DatabaseService();
+module.exports = Database.getInstance();

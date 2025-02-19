@@ -1,6 +1,8 @@
 const AuthServer = require('#auth/server.js');
 
 class Application {
+  database;
+
   constructor() {
     this.server = new AuthServer();
   }

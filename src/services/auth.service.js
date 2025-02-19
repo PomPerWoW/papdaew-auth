@@ -2,22 +2,23 @@ const { ConflictError } = require('@papdaew/shared');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 
-const config = require('#auth/config.js');
-const databaseService = require('#auth/services/database.service.js');
+const { config } = require('#auth/config.js');
+const database = require('#auth/database.js');
 
 class AuthService {
+  #database;
+
+  constructor() {
+    this.#database = database;
+  }
+
   #generateToken = user =>
     jwt.sign({ email: user.email }, config.JWT_SECRET, {
       expiresIn: config.JWT_EXPIRES_IN,
     });
 
-  #sanitizeUser = user => {
-    const { _password, ...sanitizedUser } = user;
-    return sanitizedUser;
-  };
-
   createUser = async userData => {
-    const existingUser = await databaseService.prisma.user.findUnique({
+    const existingUser = await this.#database.prisma.user.findUnique({
       where: { email: userData.email },
     });
 
@@ -27,7 +28,7 @@ class AuthService {
 
     const hashedPassword = await bcrypt.hash(userData.password, 10);
 
-    const user = await databaseService.prisma.user.create({
+    const user = await this.#database.prisma.user.create({
       data: {
         email: userData.email,
         name: userData.name,
@@ -38,7 +39,7 @@ class AuthService {
     const token = this.#generateToken(user);
 
     return {
-      user: this.#sanitizeUser(user),
+      user,
       token,
     };
   };
