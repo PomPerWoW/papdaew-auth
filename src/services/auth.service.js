@@ -2,12 +2,13 @@ const { ConflictError } = require('@papdaew/shared');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 
+const config = require('#auth/config.js');
 const databaseService = require('#auth/services/database.service.js');
 
 class AuthService {
   #generateToken = user =>
-    jwt.sign({ email: user.email }, process.env.JWT_SECRET, {
-      expiresIn: process.env.JWT_EXPIRES_IN,
+    jwt.sign({ email: user.email }, config.JWT_SECRET, {
+      expiresIn: config.JWT_EXPIRES_IN,
     });
 
   #sanitizeUser = user => {
