@@ -13,7 +13,7 @@ class AuthService {
   }
 
   #generateToken = user =>
-    jwt.sign({ email: user.email }, config.JWT_SECRET, {
+    jwt.sign({ id: user.id }, config.JWT_SECRET, {
       expiresIn: config.JWT_EXPIRES_IN,
     });
 

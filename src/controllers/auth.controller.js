@@ -1,8 +1,9 @@
-const { asyncHandler } = require('@papdaew/shared');
+const { asyncHandler, BadRequestError } = require('@papdaew/shared');
 const { PinoLogger } = require('@papdaew/shared/src/logger');
 const { StatusCodes } = require('http-status-codes');
 
 const config = require('#auth/configs/config.js');
+const userSchema = require('#auth/schemas/user.schema.js');
 const AuthService = require('#auth/services/auth.service.js');
 
 class AuthController {
@@ -21,11 +22,24 @@ class AuthController {
 
   signup = asyncHandler(async (req, res) => {
     this.#logger.info('POST: /signup');
+    const { error } = userSchema.validate(req.body);
+
+    if (error) {
+      this.#logger.error(error.message);
+      throw new BadRequestError(error.message);
+    }
+
     const result = await this.#authService.createUser(req.body);
+
+    res.cookie('token', result.token, {
+      httpOnly: true,
+      secure: config.NODE_ENV === 'production',
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+    });
 
     res.status(StatusCodes.CREATED).json({
       status: 'success',
-      message: 'User created successfully',
+      message: 'User registered successfully',
       data: result,
     });
   });

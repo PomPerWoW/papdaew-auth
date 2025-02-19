@@ -13,6 +13,11 @@ class Database {
         { level: 'warn', emit: 'event' },
         { level: 'error', emit: 'event' },
       ],
+      omit: {
+        user: {
+          password: true,
+        },
+      },
     });
 
     this.#logger = new PinoLogger({
