@@ -5,7 +5,10 @@ const {
   NotFoundError,
   PinoLogger,
 } = require('@papdaew/shared');
+const cors = require('cors');
 const express = require('express');
+const helmet = require('helmet');
+const hpp = require('hpp');
 
 const { config } = require('#auth/config.js');
 const { healthRoutes } = require('#auth/routes/health.routes.js');
@@ -25,15 +28,23 @@ class AuthServer {
   }
 
   setup() {
+    this.#setupSecurityMiddleware(this.#app);
     this.#setupMiddleware(this.#app);
     this.#setupRoutes(this.#app);
-    this.#setupErrorHandlers();
+    this.#setupErrorHandlers(this.#app);
     return this.#app;
   }
 
   start() {
     this.setup();
     this.#startServer(this.#app);
+  }
+
+  #setupSecurityMiddleware(app) {
+    app.set('trust proxy', true);
+    app.use(cors());
+    app.use(helmet());
+    app.use(hpp());
   }
 
   #setupMiddleware(app) {
@@ -45,8 +56,8 @@ class AuthServer {
     app.use('', healthRoutes);
   }
 
-  #setupErrorHandlers() {
-    this.#app.all('*', (req, _res, next) => {
+  #setupErrorHandlers(app) {
+    app.all('*', (req, _res, next) => {
       const fullUrl = `${req.protocol}://${req.get('host')}${req.originalUrl}`;
       this.#logger.error(`${fullUrl} endpoint does not exist.`);
       next(
@@ -56,23 +67,40 @@ class AuthServer {
       );
     });
 
-    this.#app.use(globalErrorHandler);
+    app.use(globalErrorHandler);
   }
 
-  async #startServer(app) {
-    try {
-      await this.#startHttpServer(app);
-    } catch (error) {
-      this.#logger.error(error);
-      process.exit(1);
-    }
+  #startServer(app) {
+    this.#startHttpServer(app);
   }
 
-  async #startHttpServer(app) {
+  #startHttpServer(app) {
     const server = http.createServer(app);
 
     server.listen(config.PORT, () => {
       this.#logger.info(`Auth service is running on port ${config.PORT}`);
+    });
+
+    process.on('uncaughtException', error => {
+      this.#logger.error('Uncaught Exception:', error);
+      server.close(() => {
+        process.exit(1);
+      });
+    });
+
+    process.on('unhandledRejection', (reason, promise, error) => {
+      this.#logger.error('Unhandled Rejection at:', promise, 'reason:', reason);
+      this.#logger.error(`Error (${error.name}): - ${error.message}`);
+      server.close(() => {
+        process.exit(1);
+      });
+    });
+
+    process.on('SIGTERM', () => {
+      this.#logger.info('SIGTERM signal received: closing HTTP server');
+      server.close(() => {
+        this.#logger.info('HTTP server closed');
+      });
     });
   }
 }
