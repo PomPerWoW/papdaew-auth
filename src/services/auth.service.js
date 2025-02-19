@@ -30,8 +30,8 @@ class AuthService {
 
     const user = await this.#database.prisma.user.create({
       data: {
+        username: userData.username,
         email: userData.email,
-        name: userData.name,
         password: hashedPassword,
       },
     });

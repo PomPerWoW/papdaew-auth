@@ -5,6 +5,7 @@ const {
   NotFoundError,
   PinoLogger,
 } = require('@papdaew/shared');
+const compression = require('compression');
 const cors = require('cors');
 const express = require('express');
 const helmet = require('helmet');
@@ -49,6 +50,7 @@ class AuthServer {
   }
 
   #setupMiddleware(app) {
+    app.use(compression());
     app.use(express.json());
     app.use(express.urlencoded({ extended: true }));
   }
