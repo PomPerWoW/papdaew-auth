@@ -11,14 +11,12 @@ const helmet = require('helmet');
 const hpp = require('hpp');
 
 const { config } = require('#auth/configs/config.js');
-const Metrics = require('#auth/monitoring/metrics.js');
 const { authRoutes } = require('#auth/routes/auth.routes.js');
 const { healthRoutes } = require('#auth/routes/health.routes.js');
 
 class AuthServer {
   #app;
   #logger;
-  #metrics;
 
   constructor() {
     this.#app = express();
@@ -28,14 +26,12 @@ class AuthServer {
       serviceVersion: config.SERVICE_VERSION,
       environment: config.NODE_ENV,
     });
-    this.#metrics = new Metrics();
   }
 
   setup() {
     this.#setupSecurityMiddleware(this.#app);
     this.#setupMiddleware(this.#app);
     this.#setupRoutes(this.#app);
-    this.#setupMetricsMiddleware(this.#app);
     this.#setupErrorHandlers(this.#app);
     return this.#app;
   }
@@ -60,29 +56,6 @@ class AuthServer {
   #setupRoutes(app) {
     app.use('', healthRoutes);
     app.use('/api/v1/auth', authRoutes);
-  }
-
-  #setupMetricsMiddleware(app) {
-    app.use((req, res, next) => {
-      const start = Date.now();
-
-      res.on('finish', () => {
-        const duration = (Date.now() - start) / 1000;
-        this.#metrics.incrementHttpRequests(req.method, res.statusCode);
-        this.#metrics.observeHttpRequestDuration(
-          req.method,
-          req.path,
-          duration
-        );
-      });
-
-      next();
-    });
-
-    app.get('/metrics', async (req, res) => {
-      res.set('Content-Type', this.#metrics.metrics.contentType);
-      res.end(await this.#metrics.metrics.metrics());
-    });
   }
 
   #setupErrorHandlers(app) {
