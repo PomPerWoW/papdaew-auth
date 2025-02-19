@@ -1,8 +1,9 @@
+const { StatusCodes } = require('http-status-codes');
 const request = require('supertest');
 
 const AuthServer = require('#auth/server.js');
 
-describe('Health Check Endpoints', () => {
+describe('Health Check Integration Tests', () => {
   let app;
 
   beforeAll(() => {
@@ -15,7 +16,7 @@ describe('Health Check Endpoints', () => {
       const response = await request(app)
         .get('/')
         .expect('Content-Type', /text/)
-        .expect(200);
+        .expect(StatusCodes.OK);
 
       expect(response.text).toBe('Auth service is healthy and OK');
     });
@@ -26,7 +27,7 @@ describe('Health Check Endpoints', () => {
       const response = await request(app)
         .get('/error')
         .expect('Content-Type', /text/)
-        .expect(500);
+        .expect(StatusCodes.INTERNAL_SERVER_ERROR);
 
       expect(response.text).toBe('Auth service is unhealthy');
     });

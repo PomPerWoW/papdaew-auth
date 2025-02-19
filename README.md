@@ -32,11 +32,23 @@ Authentication service for Papdaew. This service handles user authentication, au
 ## Project Structure
 
 ```
-services/auth/
+services/papdaew-auth/
 ├── src/
+│   ├── controllers/
+│   ├── middleware/
+│   ├── models/
+│   ├── routes/
+│   ├── services/
+│   ├── utils/
+│   ├── config.js
+│   ├── server.js
+│   └── app.js
 ├── tests/
-├── docs/
-├── scripts/
+├── .editorconfig
+├── .env.example
+├── .gitignore
+├── package.json
+└── README.md
 ```
 
 ## Getting Started

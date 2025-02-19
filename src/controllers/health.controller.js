@@ -1,8 +1,8 @@
-const { logger } = require('@papdaew/shared');
+const { PinoLogger } = require('@papdaew/shared');
 const { StatusCodes } = require('http-status-codes');
 
 class HealthController {
-  #logger = new logger({
+  #logger = new PinoLogger({
     name: 'Health Controller',
     level: process.env.LOG_LEVEL || 'info',
     serviceVersion: process.env.SERVICE_VERSION || '1.0.0',

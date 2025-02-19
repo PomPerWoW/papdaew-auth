@@ -1,6 +1,10 @@
 const http = require('http');
 
-const { errors, logger } = require('@papdaew/shared');
+const {
+  globalErrorHandler,
+  NotFoundError,
+  PinoLogger,
+} = require('@papdaew/shared');
 const express = require('express');
 
 const { config } = require('#auth/config.js');
@@ -12,7 +16,7 @@ class AuthServer {
 
   constructor() {
     this.#app = express();
-    this.#logger = new logger({
+    this.#logger = new PinoLogger({
       name: 'Auth Server',
       level: process.env.LOG_LEVEL || 'info',
       serviceVersion: process.env.SERVICE_VERSION || '1.0.0',
@@ -46,13 +50,13 @@ class AuthServer {
       const fullUrl = `${req.protocol}://${req.get('host')}${req.originalUrl}`;
       this.#logger.error(`${fullUrl} endpoint does not exist.`);
       next(
-        new errors.NotFoundError(
+        new NotFoundError(
           `Can't find ${req.method}:${req.originalUrl} on this server!`
         )
       );
     });
 
-    this.#app.use(errors.globalErrorHandler);
+    this.#app.use(globalErrorHandler);
   }
 
   async #startServer(app) {
