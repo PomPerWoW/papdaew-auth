@@ -2,8 +2,8 @@ const { ConflictError } = require('@papdaew/shared');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 
-const { config } = require('#auth/config.js');
-const Database = require('#auth/database.js');
+const { config } = require('#auth/configs/config.js');
+const Database = require('#auth/configs/database.js');
 
 class AuthService {
   #database;

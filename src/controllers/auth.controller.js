@@ -2,7 +2,7 @@ const { asyncHandler } = require('@papdaew/shared');
 const { PinoLogger } = require('@papdaew/shared/src/logger');
 const { StatusCodes } = require('http-status-codes');
 
-const config = require('#auth/config.js');
+const config = require('#auth/configs/config.js');
 const AuthService = require('#auth/services/auth.service.js');
 
 class AuthController {

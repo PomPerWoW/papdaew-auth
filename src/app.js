@@ -1,4 +1,4 @@
-const Database = require('#auth/database.js');
+const Database = require('#auth/configs/database.js');
 const AuthServer = require('#auth/server.js');
 
 class Application {
