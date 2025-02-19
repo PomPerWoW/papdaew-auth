@@ -11,7 +11,9 @@ const helmet = require('helmet');
 const hpp = require('hpp');
 
 const { config } = require('#auth/config.js');
+const { authRoutes } = require('#auth/routes/auth.routes.js');
 const { healthRoutes } = require('#auth/routes/health.routes.js');
+const databaseService = require('#auth/services/database.service.js');
 
 class AuthServer {
   #app;
@@ -21,9 +23,9 @@ class AuthServer {
     this.#app = express();
     this.#logger = new PinoLogger({
       name: 'Auth Server',
-      level: process.env.LOG_LEVEL || 'info',
-      serviceVersion: process.env.SERVICE_VERSION || '1.0.0',
-      environment: process.env.NODE_ENV || 'development',
+      level: config.LOG_LEVEL,
+      serviceVersion: config.SERVICE_VERSION,
+      environment: config.NODE_ENV,
     });
   }
 
@@ -54,6 +56,7 @@ class AuthServer {
 
   #setupRoutes(app) {
     app.use('', healthRoutes);
+    app.use('/api/v1/auth', authRoutes);
   }
 
   #setupErrorHandlers(app) {
@@ -70,8 +73,14 @@ class AuthServer {
     app.use(globalErrorHandler);
   }
 
-  #startServer(app) {
-    this.#startHttpServer(app);
+  async #startServer(app) {
+    try {
+      await databaseService.connect();
+      this.#startHttpServer(app);
+    } catch (error) {
+      this.#logger.error('Failed to start server', error);
+      process.exit(1);
+    }
   }
 
   #startHttpServer(app) {
@@ -96,8 +105,9 @@ class AuthServer {
       });
     });
 
-    process.on('SIGTERM', () => {
+    process.on('SIGTERM', async () => {
       this.#logger.info('SIGTERM signal received: closing HTTP server');
+      await databaseService.disconnect();
       server.close(() => {
         this.#logger.info('HTTP server closed');
       });

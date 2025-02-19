@@ -1,12 +1,14 @@
 const { PinoLogger } = require('@papdaew/shared');
 const { StatusCodes } = require('http-status-codes');
 
+const config = require('#auth/config.js');
+
 class HealthController {
   #logger = new PinoLogger({
     name: 'Health Controller',
-    level: process.env.LOG_LEVEL || 'info',
-    serviceVersion: process.env.SERVICE_VERSION || '1.0.0',
-    environment: process.env.NODE_ENV || 'development',
+    level: config.LOG_LEVEL || 'info',
+    serviceVersion: config.SERVICE_VERSION || '1.0.0',
+    environment: config.NODE_ENV || 'development',
   });
 
   getHealth = async (req, res) => {

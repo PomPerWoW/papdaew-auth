@@ -71,7 +71,17 @@ services/papdaew-auth/
    cp .env.example .env
    ```
 
-3. Run the service:
+3. **Database Setup**
+
+```bash
+# Start PostgreSQL (if using Docker)
+docker-compose up -d postgres
+
+# Run database migrations
+npx prisma migrate dev
+```
+
+4. Run the service:
 
    ```bash
    # Development
