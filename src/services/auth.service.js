@@ -20,46 +20,42 @@ class AuthService {
   }
 
   createUser = async (userData, provider = 'local') => {
-    try {
-      const existingUser = await this.#database.prisma.user.findFirst({
-        where: {
-          OR: [
-            { email: userData.email },
-            { username: userData.username || userData.email.split('@')[0] },
-          ],
-        },
-      });
+    const existingUser = await this.#database.prisma.user.findFirst({
+      where: {
+        OR: [
+          { email: userData.email },
+          { username: userData.username || userData.email.split('@')[0] },
+        ],
+      },
+    });
 
-      if (existingUser) {
-        if (provider === 'google' && existingUser.provider === 'google') {
-          return existingUser;
-        }
-        throw new ConflictError('User already exists');
+    if (existingUser) {
+      if (provider === 'google' && existingUser.provider === 'google') {
+        return existingUser;
       }
-
-      const userCreateData = {
-        email: userData.email,
-        username: userData.username || userData.email.split('@')[0],
-        role: userData.role || 'CUSTOMER',
-        provider,
-        providerId: userData.providerId,
-      };
-
-      if (provider === 'local') {
-        userCreateData.password = await bcrypt.hash(userData.password, 10);
-      }
-
-      const user = await this.#database.prisma.user.create({
-        data: userCreateData,
-      });
-
-      await this.#assignDefaultPermissions(user.id, user.role);
-
-      return user;
-    } catch (error) {
-      this.#logger.error('Error creating user:', error);
-      throw error;
+      this.#logger.error('User already exists');
+      throw new ConflictError('User already exists');
     }
+
+    const userCreateData = {
+      email: userData.email,
+      username: userData.username || userData.email.split('@')[0],
+      role: userData.role || 'CUSTOMER',
+      provider,
+      providerId: userData.providerId,
+    };
+
+    if (provider === 'local') {
+      userCreateData.password = await bcrypt.hash(userData.password, 10);
+    }
+
+    const user = await this.#database.prisma.user.create({
+      data: userCreateData,
+    });
+
+    await this.#assignDefaultPermissions(user.id, user.role);
+
+    return user;
   };
 
   findUser = async userData => {
@@ -75,16 +71,29 @@ class AuthService {
     });
 
     if (!existingUser) {
+      this.#logger.error('Invalid credentials');
       throw new BadRequestError('Invalid credentials');
     }
 
-    const isPasswordValid = bcrypt.compare(
-      userData.password,
-      existingUser.password
-    );
+    if (existingUser.provider === 'local') {
+      const isPasswordValid = bcrypt.compare(
+        userData.password,
+        existingUser.password
+      );
 
-    if (!isPasswordValid) {
-      throw new BadRequestError('Invalid credentials');
+      if (!isPasswordValid) {
+        this.#logger.error('Invalid credentials');
+        throw new BadRequestError('Invalid credentials');
+      }
+    }
+
+    if (existingUser.provider === 'google') {
+      this.#logger.error(
+        'This account is linked to Google, please login with Google'
+      );
+      throw new BadRequestError(
+        'This account is linked to Google, please login with Google'
+      );
     }
 
     const user = await this.#database.prisma.user.findUnique({
