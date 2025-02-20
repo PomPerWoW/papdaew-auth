@@ -50,7 +50,7 @@ class PassportConfig {
         },
         async (accessToken, refreshToken, profile, done) => {
           try {
-            const { user } = await this.#authService.createUser(
+            const user = await this.#authService.createUser(
               {
                 email: profile.emails[0].value,
                 firstName: profile.name.givenName,

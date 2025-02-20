@@ -4,7 +4,6 @@ const bcrypt = require('bcrypt');
 
 const { config } = require('#auth/configs/config.js');
 const Database = require('#auth/configs/database.js');
-const generateToken = require('#auth/utils/generateToken.js');
 
 class AuthService {
   #database;
@@ -33,7 +32,7 @@ class AuthService {
 
       if (existingUser) {
         if (provider === 'google' && existingUser.provider === 'google') {
-          return { user: existingUser, token: generateToken(existingUser) };
+          return existingUser;
         }
         throw new ConflictError('User already exists');
       }
@@ -56,9 +55,7 @@ class AuthService {
 
       await this.#assignDefaultPermissions(user.id, user.role);
 
-      const token = generateToken(user);
-
-      return { user, token };
+      return user;
     } catch (error) {
       this.#logger.error('Error creating user:', error);
       throw error;

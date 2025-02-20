@@ -30,9 +30,11 @@ class AuthController {
       throw new BadRequestError(error.message);
     }
 
-    const result = await this.#authService.createUser(req.body);
+    const user = await this.#authService.createUser(req.body);
 
-    res.cookie('token', result.token, {
+    const token = generateToken(user);
+
+    res.cookie('token', token, {
       httpOnly: true,
       secure: config.NODE_ENV === 'production',
       maxAge: 7 * 24 * 60 * 60 * 1000,
@@ -41,7 +43,7 @@ class AuthController {
     res.status(StatusCodes.CREATED).json({
       status: 'success',
       message: 'User registered successfully',
-      data: result,
+      data: user,
     });
   });
 
