@@ -5,6 +5,7 @@ const { StatusCodes } = require('http-status-codes');
 const config = require('#auth/configs/config.js');
 const userSchema = require('#auth/schemas/user.schema.js');
 const AuthService = require('#auth/services/auth.service.js');
+const generateToken = require('#auth/utils/generateToken.js');
 
 class AuthController {
   #authService;
@@ -42,6 +43,20 @@ class AuthController {
       message: 'User registered successfully',
       data: result,
     });
+  });
+
+  googleCallback = asyncHandler(async (req, res) => {
+    this.#logger.info('Google OAuth callback');
+
+    const token = generateToken(req.user);
+
+    res.cookie('token', token, {
+      httpOnly: true,
+      secure: config.NODE_ENV === 'production',
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+    });
+
+    res.redirect('/');
   });
 }
 

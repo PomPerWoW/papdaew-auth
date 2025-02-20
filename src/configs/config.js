@@ -11,6 +11,10 @@ class Config {
     this.JWT_SECRET = process.env.JWT_SECRET;
     this.JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '24h';
     this.DATABASE_URL = process.env.DATABASE_URL;
+    this.GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
+    this.GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET;
+    this.API_URL = process.env.API_URL || 'http://localhost:3001/api/v1';
+    this.SESSION_SECRET = process.env.SESSION_SECRET;
   }
 }
 
