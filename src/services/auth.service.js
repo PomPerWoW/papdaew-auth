@@ -1,4 +1,4 @@
-const { ConflictError } = require('@papdaew/shared');
+const { ConflictError, BadRequestError } = require('@papdaew/shared');
 const { PinoLogger } = require('@papdaew/shared');
 const bcrypt = require('bcrypt');
 
@@ -60,6 +60,38 @@ class AuthService {
       this.#logger.error('Error creating user:', error);
       throw error;
     }
+  };
+
+  findUser = async userData => {
+    const existingUser = await this.#database.prisma.user.findFirst({
+      where: {
+        OR: [{ email: userData.identifier }, { username: userData.identifier }],
+      },
+      select: {
+        id: true,
+        password: true,
+        provider: true,
+      },
+    });
+
+    if (!existingUser) {
+      throw new BadRequestError('Invalid credentials');
+    }
+
+    const isPasswordValid = bcrypt.compare(
+      userData.password,
+      existingUser.password
+    );
+
+    if (!isPasswordValid) {
+      throw new BadRequestError('Invalid credentials');
+    }
+
+    const user = await this.#database.prisma.user.findUnique({
+      where: { id: existingUser.id },
+    });
+
+    return user;
   };
 
   #assignDefaultPermissions = async (userId, userRole) => {

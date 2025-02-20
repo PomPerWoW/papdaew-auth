@@ -18,12 +18,12 @@ Authentication service for Papdaew. This service handles user authentication, au
 
 ## Features
 
-- User authentication (login/signup) (in-progress)
-- JWT token management (planned)
-- Role-based access control (planned)
+- User authentication (login/signup) (finished)
+- JWT token management (finished)
+- Role-based access control (in-progress)
 - Password reset functionality (planned)
-- Session management (planned)
-- OAuth integration (planned)
+- Session management (finished)
+- OAuth integration (finished)
 
 ## Tech Stack
 
