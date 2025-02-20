@@ -18,12 +18,12 @@ Authentication service for Papdaew. This service handles user authentication, au
 
 ## Features
 
-- User authentication (login/signup) (in-progress)
-- JWT token management (planned)
-- Role-based access control (planned)
+- User authentication (login/signup) (finished)
+- JWT token management (finished)
+- Role-based access control (in-progress)
 - Password reset functionality (planned)
-- Session management (planned)
-- OAuth integration (planned)
+- Session management (finished)
+- OAuth integration (finished)
 
 ## Tech Stack
 
@@ -32,11 +32,23 @@ Authentication service for Papdaew. This service handles user authentication, au
 ## Project Structure
 
 ```
-services/auth/
+services/papdaew-auth/
 ├── src/
+│   ├── controllers/
+│   ├── middleware/
+│   ├── models/
+│   ├── routes/
+│   ├── services/
+│   ├── utils/
+│   ├── config.js
+│   ├── server.js
+│   └── app.js
 ├── tests/
-├── docs/
-├── scripts/
+├── .editorconfig
+├── .env.example
+├── .gitignore
+├── package.json
+└── README.md
 ```
 
 ## Getting Started
@@ -59,7 +71,17 @@ services/auth/
    cp .env.example .env
    ```
 
-3. Run the service:
+3. **Database Setup**
+
+```bash
+# Start PostgreSQL (if using Docker)
+docker-compose up -d postgres
+
+# Run database migrations
+npx prisma migrate dev
+```
+
+4. Run the service:
 
    ```bash
    # Development

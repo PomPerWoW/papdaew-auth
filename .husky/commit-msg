@@ -1,0 +1,43 @@
+# services/papdaew-auth/.husky/commit-msg
+
+echo "🔍 (Auth) Checking commit message format..."
+
+# Get the commit message
+commit_msg=$(cat "$1")
+
+# Regex patterns
+conventional_pattern="^(feat|fix|docs|style|refactor|test|chore)(\([a-z-]+\))?!?: .+"
+merge_pattern="^Merge (branch|pull request|remote-tracking branch) '.*'( into .*)?$"
+revert_pattern="^Revert \".*\"$"
+
+# Check if it's a merge commit, conventional commit, or revert commit
+if echo "$commit_msg" | grep -qE "$merge_pattern"; then
+    echo "✅ Valid merge commit message!"
+    exit 0
+elif echo "$commit_msg" | grep -qE "$revert_pattern"; then
+    echo "✅ Valid revert commit message!"
+    exit 0
+elif echo "$commit_msg" | grep -qE "$conventional_pattern"; then
+    echo "✅ Valid conventional commit message!"
+    exit 0
+else
+    echo "❌ Invalid commit message format."
+    echo "Please use one of these formats:"
+    echo ""
+    echo "1. Conventional commits:"
+    echo "  feat(scope): description"
+    echo "  fix(scope): description"
+    echo "  docs(scope): description"
+    echo "  style(scope): description"
+    echo "  refactor(scope): description"
+    echo "  test(scope): description"
+    echo "  chore(scope): description"
+    echo ""
+    echo "2. Merge commits (automatic):"
+    echo "  Merge branch 'branch-name'"
+    echo "  Merge pull request #123 from owner/branch"
+    echo ""
+    echo "3. Revert commits (automatic):"
+    echo "  Revert \"original commit message\""
+    exit 1
+fi

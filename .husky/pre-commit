@@ -1,0 +1,27 @@
+# services/papdaew-auth/.husky/pre-commit
+
+echo "🔍 (Auth) Running pre-commit checks..."
+
+# Run lint checks
+echo "\n🎨 Running lint checks..."
+npm run lint:check || {
+    echo "❌ Linting failed. Please fix the issues above and try committing again."
+    exit 1
+}
+
+# Run format checks
+echo "\n💅 Running format checks..."
+npm run format:check || {
+    echo "❌ Formatting failed. Please fix the issues above and try committing again."
+    exit 1
+}
+
+# Run tests
+echo "\n🧪 Running tests..."
+npm test || {
+    echo "❌ Tests failed. Please fix the failing tests and try committing again."
+    exit 1
+}
+
+# If everything passes
+echo "\n✅ All checks passed! Proceeding with commit..."
