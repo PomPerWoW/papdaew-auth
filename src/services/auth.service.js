@@ -2,20 +2,22 @@ const { ConflictError, BadRequestError } = require('@papdaew/shared');
 const { PinoLogger } = require('@papdaew/shared');
 const bcrypt = require('bcrypt');
 
-const { config } = require('#auth/configs/config.js');
+const Config = require('#auth/configs/config.js');
 const Database = require('#auth/configs/database.js');
 
 class AuthService {
   #database;
   #logger;
+  #config;
 
   constructor() {
     this.#database = new Database();
+    this.#config = new Config();
     this.#logger = new PinoLogger({
       name: 'Auth Service',
-      level: config.LOG_LEVEL,
-      serviceVersion: config.SERVICE_VERSION,
-      environment: config.NODE_ENV,
+      level: this.#config.LOG_LEVEL,
+      serviceVersion: this.#config.SERVICE_VERSION,
+      environment: this.#config.NODE_ENV,
     });
   }
 

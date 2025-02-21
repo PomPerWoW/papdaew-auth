@@ -13,7 +13,7 @@ const helmet = require('helmet');
 const hpp = require('hpp');
 const passport = require('passport');
 
-const { config } = require('#auth/configs/config.js');
+const Config = require('#auth/configs/config.js');
 const { authRoutes } = require('#auth/routes/auth.routes.js');
 const { healthRoutes } = require('#auth/routes/health.routes.js');
 
@@ -22,14 +22,16 @@ require('#auth/configs/passport.js');
 class AuthServer {
   #app;
   #logger;
+  #config;
 
   constructor() {
     this.#app = express();
+    this.#config = new Config();
     this.#logger = new PinoLogger({
       name: 'Auth Server',
-      level: config.LOG_LEVEL,
-      serviceVersion: config.SERVICE_VERSION,
-      environment: config.NODE_ENV,
+      level: this.#config.LOG_LEVEL,
+      serviceVersion: this.#config.SERVICE_VERSION,
+      environment: this.#config.NODE_ENV,
     });
   }
 
@@ -60,11 +62,11 @@ class AuthServer {
 
     app.use(
       session({
-        secret: config.SESSION_SECRET,
+        secret: this.#config.SESSION_SECRET,
         resave: false,
         saveUninitialized: false,
         cookie: {
-          secure: config.NODE_ENV === 'production',
+          secure: this.#config.NODE_ENV === 'production',
           maxAge: 7 * 24 * 60 * 60 * 1000,
         },
       })
@@ -104,8 +106,8 @@ class AuthServer {
   #startHttpServer(app) {
     const server = http.createServer(app);
 
-    server.listen(config.PORT, () => {
-      this.#logger.info(`Auth service is running on port ${config.PORT}`);
+    server.listen(this.#config.PORT, () => {
+      this.#logger.info(`Auth service is running on port ${this.#config.PORT}`);
     });
 
     process.on('uncaughtException', error => {

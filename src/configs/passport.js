@@ -2,7 +2,7 @@ const { PinoLogger } = require('@papdaew/shared');
 const passport = require('passport');
 const { Strategy: GoogleStrategy } = require('passport-google-oauth20');
 
-const { config } = require('#auth/configs/config.js');
+const Config = require('#auth/configs/config.js');
 const Database = require('#auth/configs/database.js');
 const AuthService = require('#auth/services/auth.service.js');
 
@@ -10,15 +10,17 @@ class PassportConfig {
   #logger;
   #authService;
   #database;
+  #config;
 
   constructor() {
-    this.#database = new Database();
     this.#authService = new AuthService();
+    this.#config = new Config();
+    this.#database = new Database();
     this.#logger = new PinoLogger({
       name: 'Passport Config',
-      level: config.LOG_LEVEL,
-      serviceVersion: config.SERVICE_VERSION,
-      environment: config.NODE_ENV,
+      level: this.#config.LOG_LEVEL,
+      serviceVersion: this.#config.SERVICE_VERSION,
+      environment: this.#config.NODE_ENV,
     });
 
     this.initialize();
@@ -43,9 +45,9 @@ class PassportConfig {
     passport.use(
       new GoogleStrategy(
         {
-          clientID: config.GOOGLE_CLIENT_ID,
-          clientSecret: config.GOOGLE_CLIENT_SECRET,
-          callbackURL: `${config.API_URL}/auth/google/callback`,
+          clientID: this.#config.GOOGLE_CLIENT_ID,
+          clientSecret: this.#config.GOOGLE_CLIENT_SECRET,
+          callbackURL: `${this.#config.API_URL}/auth/google/callback`,
           scope: ['profile', 'email'],
         },
         async (accessToken, refreshToken, profile, done) => {

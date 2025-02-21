@@ -2,7 +2,7 @@ const { asyncHandler, BadRequestError } = require('@papdaew/shared');
 const { PinoLogger } = require('@papdaew/shared/src/logger');
 const { StatusCodes } = require('http-status-codes');
 
-const config = require('#auth/configs/config.js');
+const Config = require('#auth/configs/config.js');
 const { signupSchema, loginSchema } = require('#auth/schemas/auth.schema.js');
 const AuthService = require('#auth/services/auth.service.js');
 const generateToken = require('#auth/utils/generateToken.js');
@@ -10,14 +10,16 @@ const generateToken = require('#auth/utils/generateToken.js');
 class AuthController {
   #authService;
   #logger;
+  #config;
 
   constructor() {
     this.#authService = new AuthService();
+    this.#config = new Config();
     this.#logger = new PinoLogger({
       name: 'Auth Controller',
-      level: config.LOG_LEVEL,
-      serviceVersion: config.SERVICE_VERSION,
-      environment: config.NODE_ENV,
+      level: this.#config.LOG_LEVEL,
+      serviceVersion: this.#config.SERVICE_VERSION,
+      environment: this.#config.NODE_ENV,
     });
   }
 
@@ -26,7 +28,7 @@ class AuthController {
 
     res.cookie('token', token, {
       httpOnly: true,
-      secure: config.NODE_ENV === 'production',
+      secure: this.#config.NODE_ENV === 'production',
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
   };
@@ -80,7 +82,7 @@ class AuthController {
 
     res.cookie('token', token, {
       httpOnly: true,
-      secure: config.NODE_ENV === 'production',
+      secure: this.#config.NODE_ENV === 'production',
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 

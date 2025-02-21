@@ -1,17 +1,19 @@
 const { PinoLogger, asyncHandler } = require('@papdaew/shared');
 const { StatusCodes } = require('http-status-codes');
 
-const config = require('#auth/configs/config.js');
+const Config = require('#auth/configs/config.js');
 
 class HealthController {
   #logger;
+  #config;
 
   constructor() {
+    this.#config = new Config();
     this.#logger = new PinoLogger({
       name: 'Health Controller',
-      level: config.LOG_LEVEL,
-      serviceVersion: config.SERVICE_VERSION,
-      environment: config.NODE_ENV,
+      level: this.#config.LOG_LEVEL,
+      serviceVersion: this.#config.SERVICE_VERSION,
+      environment: this.#config.NODE_ENV,
     });
   }
 
