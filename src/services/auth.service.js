@@ -2,8 +2,8 @@ const { ConflictError, BadRequestError } = require('@papdaew/shared');
 const { PinoLogger } = require('@papdaew/shared');
 const bcrypt = require('bcrypt');
 
-const Config = require('#auth/configs/config.js');
-const Database = require('#auth/configs/database.js');
+const Config = require('#auth/config.js');
+const Database = require('#auth/database.js');
 
 class AuthService {
   #database;
@@ -55,8 +55,6 @@ class AuthService {
       data: userCreateData,
     });
 
-    await this.#assignDefaultPermissions(user.id, user.role);
-
     return user;
   };
 
@@ -103,35 +101,6 @@ class AuthService {
     });
 
     return user;
-  };
-
-  #assignDefaultPermissions = async (userId, userRole) => {
-    const defaultPermissions = {
-      CUSTOMER: ['view_profile', 'edit_profile'],
-      VENDOR: ['view_profile', 'edit_profile', 'manage_queues', 'view_queues'],
-      ADMIN: [
-        'view_profile',
-        'edit_profile',
-        'manage_users',
-        'manage_permissions',
-      ],
-    };
-
-    const permissions = defaultPermissions[userRole] || [];
-
-    for (const permissionName of permissions) {
-      await this.#database.prisma.userPermission.create({
-        data: {
-          user: { connect: { id: userId } },
-          permission: {
-            connectOrCreate: {
-              where: { name: permissionName },
-              create: { name: permissionName },
-            },
-          },
-        },
-      });
-    }
   };
 }
 

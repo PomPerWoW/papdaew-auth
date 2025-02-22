@@ -2,11 +2,11 @@ const { PinoLogger } = require('@papdaew/shared');
 const passport = require('passport');
 const { Strategy: GoogleStrategy } = require('passport-google-oauth20');
 
-const Config = require('#auth/configs/config.js');
-const Database = require('#auth/configs/database.js');
+const Config = require('#auth/config.js');
+const Database = require('#auth/database.js');
 const AuthService = require('#auth/services/auth.service.js');
 
-class PassportConfig {
+class Passport {
   #logger;
   #authService;
   #database;
@@ -82,4 +82,4 @@ class PassportConfig {
   }
 }
 
-module.exports = new PassportConfig();
+module.exports = new Passport();

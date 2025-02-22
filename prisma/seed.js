@@ -1,46 +1,49 @@
 const { PrismaClient } = require('@prisma/client');
+const bcrypt = require('bcrypt');
 
 const prisma = new PrismaClient();
 
 async function main() {
-  const defaultPermissions = [
-    { name: 'view_profile', description: 'Can view own profile' },
-    { name: 'edit_profile', description: 'Can edit own profile' },
-    { name: 'manage_queues', description: 'Can manage queues' },
-    { name: 'view_queues', description: 'Can view queues' },
-    { name: 'manage_users', description: 'Can manage users' },
-    { name: 'manage_permissions', description: 'Can manage permissions' },
-  ];
-
-  for (const permission of defaultPermissions) {
-    await prisma.permission.upsert({
-      where: { name: permission.name },
-      update: {},
-      create: permission,
-    });
-  }
-
   await prisma.user.upsert({
     where: { email: 'admin@example.com' },
     update: {},
     create: {
       email: 'admin@example.com',
       username: 'admin',
-      password: '$2b$10$YourHashedAdminPassword',
+      password: await bcrypt.hash('admin123', 10),
       role: 'ADMIN',
-      profile: {
-        create: {
-          firstName: 'Admin',
-          lastName: 'User',
-        },
-      },
+      isActive: true,
+    },
+  });
+
+  await prisma.user.upsert({
+    where: { email: 'vendor@example.com' },
+    update: {},
+    create: {
+      email: 'vendor@example.com',
+      username: 'vendor',
+      password: await bcrypt.hash('vendor123', 10),
+      role: 'VENDOR',
+      isActive: true,
+    },
+  });
+
+  await prisma.user.upsert({
+    where: { email: 'customer@example.com' },
+    update: {},
+    create: {
+      email: 'customer@example.com',
+      username: 'customer',
+      password: await bcrypt.hash('customer123', 10),
+      role: 'CUSTOMER',
+      isActive: true,
     },
   });
 }
 
 main()
   .catch(e => {
-    console.error(e);
+    console.error('Error seeding data:', e);
     process.exit(1);
   })
   .finally(async () => {

@@ -1,6 +1,6 @@
 const jwt = require('jsonwebtoken');
 
-const Config = require('#auth/configs/config.js');
+const Config = require('#auth/config.js');
 
 const generateToken = user => {
   const config = new Config();

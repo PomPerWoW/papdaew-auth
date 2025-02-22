@@ -2,10 +2,10 @@ const { asyncHandler, BadRequestError } = require('@papdaew/shared');
 const { PinoLogger } = require('@papdaew/shared/src/logger');
 const { StatusCodes } = require('http-status-codes');
 
-const Config = require('#auth/configs/config.js');
+const Config = require('#auth/config.js');
 const { signupSchema, loginSchema } = require('#auth/schemas/auth.schema.js');
 const AuthService = require('#auth/services/auth.service.js');
-const generateToken = require('#auth/utils/generateToken.js');
+const generateToken = require('#auth/utils/generateToken.util.js');
 
 class AuthController {
   #authService;
@@ -23,7 +23,7 @@ class AuthController {
     });
   }
 
-  #setTokenCookie = (user, req, res) => {
+  #setTokenCookie = (user, _req, res) => {
     const token = generateToken(user);
 
     res.cookie('token', token, {
@@ -31,6 +31,8 @@ class AuthController {
       secure: this.#config.NODE_ENV === 'production',
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
+
+    return token;
   };
 
   signup = asyncHandler(async (req, res) => {
@@ -45,11 +47,12 @@ class AuthController {
 
     const user = await this.#authService.createUser(req.body);
 
-    this.#setTokenCookie(user, req, res);
+    const token = this.#setTokenCookie(user, req, res);
 
     res.status(StatusCodes.CREATED).json({
       status: 'success',
       message: 'User registered successfully',
+      token,
       data: user,
     });
   });
@@ -66,11 +69,12 @@ class AuthController {
 
     const user = await this.#authService.findUser(req.body);
 
-    this.#setTokenCookie(user, req, res);
+    const token = this.#setTokenCookie(user, req, res);
 
     res.status(StatusCodes.OK).json({
       status: 'success',
       message: 'User logged in successfully',
+      token,
       data: user,
     });
   });
@@ -78,13 +82,7 @@ class AuthController {
   googleCallback = asyncHandler(async (req, res) => {
     this.#logger.info('Google OAuth callback');
 
-    const token = generateToken(req.user);
-
-    res.cookie('token', token, {
-      httpOnly: true,
-      secure: this.#config.NODE_ENV === 'production',
-      maxAge: 7 * 24 * 60 * 60 * 1000,
-    });
+    this.#setTokenCookie(req.user, req, res);
 
     res.redirect('/');
   });

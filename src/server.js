@@ -13,11 +13,11 @@ const helmet = require('helmet');
 const hpp = require('hpp');
 const passport = require('passport');
 
-const Config = require('#auth/configs/config.js');
+const Config = require('#auth/config.js');
 const { authRoutes } = require('#auth/routes/auth.routes.js');
 const { healthRoutes } = require('#auth/routes/health.routes.js');
 
-require('#auth/configs/passport.js');
+require('#auth/passport.js');
 
 class AuthServer {
   #app;

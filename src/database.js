@@ -1,7 +1,7 @@
 const { PinoLogger } = require('@papdaew/shared');
 const { PrismaClient } = require('@prisma/client');
 
-const Config = require('#auth/configs/config.js');
+const Config = require('#auth/config.js');
 
 class Database {
   #prisma;

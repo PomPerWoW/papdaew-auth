@@ -1,7 +1,7 @@
 const { PinoLogger, asyncHandler } = require('@papdaew/shared');
 const { StatusCodes } = require('http-status-codes');
 
-const Config = require('#auth/configs/config.js');
+const Config = require('#auth/config.js');
 
 class HealthController {
   #logger;
