@@ -14,8 +14,8 @@ const hpp = require('hpp');
 const passport = require('passport');
 
 const Config = require('#auth/config.js');
-const { authRoutes } = require('#auth/routes/auth.routes.js');
-const { healthRoutes } = require('#auth/routes/health.routes.js');
+const { authRoutes } = require('#auth/routes/auth.route.js');
+const { healthRoutes } = require('#auth/routes/health.route.js');
 
 require('#auth/passport.js');
 
