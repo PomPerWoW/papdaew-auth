@@ -4,7 +4,7 @@ const { PinoLogger } = require('@papdaew/shared');
 
 const AuthService = require('#auth/services/auth.service.js');
 const Database = require('#auth/configs/database.config.js');
-const Config = require('#auth/config.js');
+const Config = require('#auth/configs/config.js');
 
 class Passport {
   #logger;

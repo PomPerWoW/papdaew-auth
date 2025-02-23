@@ -5,7 +5,7 @@ const { asyncHandler, BadRequestError } = require('@papdaew/shared');
 
 const AuthService = require('#auth/services/auth.service.js');
 const { signupSchema, loginSchema } = require('#auth/schemas/auth.schema.js');
-const Config = require('#auth/config.js');
+const Config = require('#auth/configs/config.js');
 
 class AuthController {
   #authService;

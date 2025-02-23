@@ -3,7 +3,7 @@ const { ConflictError, BadRequestError } = require('@papdaew/shared');
 const { PinoLogger } = require('@papdaew/shared');
 
 const Database = require('#auth/configs/database.config.js');
-const Config = require('#auth/config.js');
+const Config = require('#auth/configs/config.js');
 
 class AuthService {
   #database;

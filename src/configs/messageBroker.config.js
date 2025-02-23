@@ -1,7 +1,7 @@
 const amqp = require('amqplib');
 const { PinoLogger } = require('@papdaew/shared');
 
-const Config = require('#auth/config.js');
+const Config = require('#auth/configs/config.js');
 
 class MessageBroker {
   #logger;
