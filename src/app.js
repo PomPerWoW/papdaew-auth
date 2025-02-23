@@ -9,31 +9,31 @@ class Application {
     this.messageBroker = new MessageBroker();
   }
 
-  initialize() {
+  initialize = () => {
     this.setupUncaughtException();
     this.database.connect();
     this.messageBroker.connect();
     this.server.start();
     this.setupUnhandledRejection();
     this.setupShutdown();
-  }
+  };
 
-  setupUncaughtException() {
+  setupUncaughtException = () => {
     process.once('uncaughtException', error => {
       console.error('Uncaught Exception:', error);
       process.exit(1);
     });
-  }
+  };
 
-  setupUnhandledRejection() {
+  setupUnhandledRejection = () => {
     process.once('unhandledRejection', error => {
       console.error('Unhandled Rejection:', `${error.name}: ${error.message}`);
       this.server.close();
       process.exit(1);
     });
-  }
+  };
 
-  setupShutdown() {
+  setupShutdown = () => {
     const shutdown = async () => {
       try {
         await this.messageBroker.disconnect();
@@ -48,8 +48,9 @@ class Application {
 
     process.once('SIGTERM', shutdown);
     process.once('SIGINT', shutdown);
-  }
+  };
 }
 
 const application = new Application();
+
 application.initialize();
