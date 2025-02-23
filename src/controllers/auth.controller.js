@@ -96,6 +96,15 @@ class AuthController {
 
     res.redirect('/');
   });
+
+  logout = asyncHandler(async (req, res) => {
+    this.#logger.info('POST: /logout');
+
+    res.clearCookie('token');
+    res
+      .status(StatusCodes.OK)
+      .json({ status: 'success', message: 'User logged out successfully' });
+  });
 }
 
 module.exports = AuthController;

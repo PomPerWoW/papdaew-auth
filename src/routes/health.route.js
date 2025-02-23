@@ -2,10 +2,20 @@ const { Router } = require('express');
 
 const HealthController = require('#auth/controllers/health.controller.js');
 
-const router = Router();
-const healthController = new HealthController();
+class HealthRoutes {
+  #router;
+  #healthController;
 
-router.get('/', healthController.getHealth);
-router.get('/error', healthController.error);
+  constructor() {
+    this.#router = Router();
+    this.#healthController = new HealthController();
+  }
 
-module.exports = { healthRoutes: router };
+  setup() {
+    this.#router.get('/', this.#healthController.getHealth);
+    this.#router.get('/error', this.#healthController.error);
+    return this.#router;
+  }
+}
+
+module.exports = HealthRoutes;

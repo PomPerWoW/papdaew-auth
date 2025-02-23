@@ -14,8 +14,8 @@ const hpp = require('hpp');
 const passport = require('passport');
 
 const Config = require('#auth/config.js');
-const { authRoutes } = require('#auth/routes/auth.route.js');
-const { healthRoutes } = require('#auth/routes/health.route.js');
+const AuthRoutes = require('#auth/routes/auth.route.js');
+const HealthRoutes = require('#auth/routes/health.route.js');
 
 require('#auth/services/passport.service.js');
 
@@ -23,10 +23,14 @@ class AuthServer {
   #app;
   #logger;
   #config;
+  #authRoutes;
+  #healthRoutes;
 
   constructor() {
     this.#app = express();
     this.#config = new Config();
+    this.#authRoutes = new AuthRoutes();
+    this.#healthRoutes = new HealthRoutes();
     this.#logger = new PinoLogger({
       name: 'Auth Server',
       level: this.#config.LOG_LEVEL,
@@ -76,8 +80,8 @@ class AuthServer {
   }
 
   #setupRoutes(app) {
-    app.use('', healthRoutes);
-    app.use('/api/v1/auth', authRoutes);
+    app.use('/', this.#healthRoutes.setup());
+    app.use('/api/v1/auth', this.#authRoutes.setup());
   }
 
   #setupErrorHandlers(app) {

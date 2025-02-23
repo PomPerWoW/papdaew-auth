@@ -3,20 +3,30 @@ const passport = require('passport');
 
 const AuthController = require('#auth/controllers/auth.controller.js');
 
-const router = Router();
-const authController = new AuthController();
+class AuthRoutes {
+  #router;
+  #authController;
 
-router.post('/signup', authController.signup);
-router.post('/login', authController.login);
+  constructor() {
+    this.#router = Router();
+    this.#authController = new AuthController();
+  }
 
-router.get(
-  '/google',
-  passport.authenticate('google', { scope: ['profile', 'email'] })
-);
-router.get(
-  '/google/callback',
-  passport.authenticate('google', { session: false }),
-  authController.googleCallback
-);
+  setup() {
+    this.#router.post('/signup', this.#authController.signup);
+    this.#router.post('/login', this.#authController.login);
+    this.#router.post('/logout', this.#authController.logout);
+    this.#router.get(
+      '/google',
+      passport.authenticate('google', { scope: ['profile', 'email'] })
+    );
+    this.#router.get(
+      '/google/callback',
+      passport.authenticate('google', { session: false }),
+      this.#authController.googleCallback
+    );
+    return this.#router;
+  }
+}
 
-module.exports = { authRoutes: router };
+module.exports = AuthRoutes;
