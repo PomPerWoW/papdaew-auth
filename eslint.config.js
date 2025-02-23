@@ -54,7 +54,7 @@ module.exports = [
           ],
           'newlines-between': 'always',
           alphabetize: {
-            order: 'asc',
+            order: 'desc',
             caseInsensitive: true,
           },
         },

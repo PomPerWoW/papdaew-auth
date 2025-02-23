@@ -1,9 +1,9 @@
+const bcrypt = require('bcrypt');
 const { ConflictError, BadRequestError } = require('@papdaew/shared');
 const { PinoLogger } = require('@papdaew/shared');
-const bcrypt = require('bcrypt');
 
+const Database = require('#auth/configs/database.config.js');
 const Config = require('#auth/config.js');
-const Database = require('#auth/services/database.service.js');
 
 class AuthService {
   #database;

@@ -1,23 +1,23 @@
 const http = require('http');
 
+const passport = require('passport');
+const hpp = require('hpp');
+const helmet = require('helmet');
+const session = require('express-session');
+const express = require('express');
+const cors = require('cors');
+const compression = require('compression');
 const {
   globalErrorHandler,
   NotFoundError,
   PinoLogger,
 } = require('@papdaew/shared');
-const compression = require('compression');
-const cors = require('cors');
-const express = require('express');
-const session = require('express-session');
-const helmet = require('helmet');
-const hpp = require('hpp');
-const passport = require('passport');
 
-const Config = require('#auth/config.js');
-const AuthRoutes = require('#auth/routes/auth.route.js');
 const HealthRoutes = require('#auth/routes/health.route.js');
+const AuthRoutes = require('#auth/routes/auth.route.js');
+const Config = require('#auth/config.js');
 
-require('#auth/services/passport.service.js');
+require('#auth/configs/passport.config.js');
 
 class AuthServer {
   #app;
@@ -136,6 +136,10 @@ class AuthServer {
       server.close(() => {
         this.#logger.info('HTTP server closed');
       });
+    });
+
+    process.on('SIGINT', async () => {
+      server.close();
     });
   }
 }

@@ -1,11 +1,11 @@
-const { asyncHandler, BadRequestError } = require('@papdaew/shared');
-const { PinoLogger } = require('@papdaew/shared/src/logger');
-const { StatusCodes } = require('http-status-codes');
 const jwt = require('jsonwebtoken');
+const { StatusCodes } = require('http-status-codes');
+const { PinoLogger } = require('@papdaew/shared/src/logger');
+const { asyncHandler, BadRequestError } = require('@papdaew/shared');
 
-const Config = require('#auth/config.js');
-const { signupSchema, loginSchema } = require('#auth/schemas/auth.schema.js');
 const AuthService = require('#auth/services/auth.service.js');
+const { signupSchema, loginSchema } = require('#auth/schemas/auth.schema.js');
+const Config = require('#auth/config.js');
 
 class AuthController {
   #authService;

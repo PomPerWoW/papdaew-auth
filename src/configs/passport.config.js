@@ -1,10 +1,10 @@
-const { PinoLogger } = require('@papdaew/shared');
-const passport = require('passport');
 const { Strategy: GoogleStrategy } = require('passport-google-oauth20');
+const passport = require('passport');
+const { PinoLogger } = require('@papdaew/shared');
 
-const Config = require('#auth/config.js');
 const AuthService = require('#auth/services/auth.service.js');
-const Database = require('#auth/services/database.service.js');
+const Database = require('#auth/configs/database.config.js');
+const Config = require('#auth/config.js');
 
 class Passport {
   #logger;

@@ -1,5 +1,5 @@
-const { PinoLogger } = require('@papdaew/shared');
 const { PrismaClient } = require('@prisma/client');
+const { PinoLogger } = require('@papdaew/shared');
 
 const Config = require('#auth/config.js');
 
@@ -42,19 +42,21 @@ class Database {
     });
   };
 
+  #disconnect = () => {
+    process.once('SIGINT', async () => {
+      await this.#prisma.$disconnect();
+    });
+  };
+
   connect = async () => {
     try {
       await this.#prisma.$connect();
       this.#logger.info('Successfully connected to database');
+      this.#disconnect();
     } catch (error) {
       this.#logger.error('Failed to connect to database', error);
       throw error;
     }
-  };
-
-  disconnect = async () => {
-    await this.#prisma.$disconnect();
-    this.#logger.info('Disconnected from database');
   };
 
   get prisma() {

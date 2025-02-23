@@ -20,16 +20,19 @@ enum Role {
 }
 
 model User {
-  id         String   @id @default(uuid())
-  username   String   @unique
-  email      String   @unique
-  password   String?
-  provider   String?
-  providerId String?
-  role       Role     @default(CUSTOMER)
-  isActive   Boolean  @default(true)
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
+  id                       String    @id @default(uuid())
+  username                 String    @unique
+  email                    String    @unique
+  password                 String?
+  provider                 String?
+  providerId               String?
+  role                     Role      @default(CUSTOMER)
+  isActive                 Boolean   @default(true)
+  createdAt                DateTime  @default(now())
+  updatedAt                DateTime  @updatedAt
+  isVerified               Boolean   @default(false)
+  verificationToken        String?
+  verificationTokenExpires DateTime?
 
   @@index([email, username])
   @@index([provider, providerId])

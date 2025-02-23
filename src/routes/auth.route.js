@@ -1,5 +1,5 @@
-const { Router } = require('express');
 const passport = require('passport');
+const { Router } = require('express');
 
 const AuthController = require('#auth/controllers/auth.controller.js');
 
