@@ -8,10 +8,15 @@ class MessageBroker {
   #config;
   #connection;
   #channel;
+  static #instance;
 
   constructor() {
+    if (MessageBroker.#instance) {
+      return MessageBroker.#instance;
+    }
     this.#config = new Config();
     this.#logger = LoggerFactory.getLogger('Message Broker');
+    MessageBroker.#instance = this;
   }
 
   connect = async () => {

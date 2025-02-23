@@ -5,8 +5,12 @@ const LoggerFactory = require('#auth/utils/logger.js');
 class Database {
   #prisma;
   #logger;
+  static #instance;
 
   constructor() {
+    if (Database.#instance) {
+      return Database.#instance;
+    }
     this.#prisma = new PrismaClient({
       log: [
         { level: 'warn', emit: 'event' },
@@ -18,10 +22,9 @@ class Database {
         },
       },
     });
-
     this.#logger = LoggerFactory.getLogger('Database');
-
     this.#setupLogging();
+    Database.#instance = this;
   }
 
   #setupLogging = () => {
