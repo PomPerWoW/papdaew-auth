@@ -1,5 +1,5 @@
-const { StatusCodes } = require('http-status-codes');
 const request = require('supertest');
+const { StatusCodes } = require('http-status-codes');
 
 const AuthServer = require('#auth/server.js');
 

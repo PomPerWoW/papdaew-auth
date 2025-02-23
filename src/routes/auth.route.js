@@ -1,5 +1,5 @@
-const { Router } = require('express');
 const passport = require('passport');
+const { Router } = require('express');
 
 const AuthController = require('#auth/controllers/auth.controller.js');
 
@@ -24,6 +24,11 @@ class AuthRoutes {
       '/google/callback',
       passport.authenticate('google', { session: false }),
       this.#authController.googleCallback
+    );
+    this.#router.get('/verify-email/:token', this.#authController.verifyEmail);
+    this.#router.post(
+      '/resend-verification-email',
+      this.#authController.resendVerificationEmail
     );
     return this.#router;
   }

@@ -1,8 +1,8 @@
-const js = require('@eslint/js');
-const prettier = require('eslint-config-prettier');
-const importPlugin = require('eslint-plugin-import');
-const eslintPluginPrettier = require('eslint-plugin-prettier');
 const globals = require('globals');
+const eslintPluginPrettier = require('eslint-plugin-prettier');
+const importPlugin = require('eslint-plugin-import');
+const prettier = require('eslint-config-prettier');
+const js = require('@eslint/js');
 
 module.exports = [
   {
@@ -54,7 +54,7 @@ module.exports = [
           ],
           'newlines-between': 'always',
           alphabetize: {
-            order: 'asc',
+            order: 'desc',
             caseInsensitive: true,
           },
         },

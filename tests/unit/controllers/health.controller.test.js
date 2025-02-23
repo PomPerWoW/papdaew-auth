@@ -1,14 +1,13 @@
-const { PinoLogger } = require('@papdaew/shared');
 const { StatusCodes } = require('http-status-codes');
 
+const LoggerFactory = require('#auth/utils/logger.js');
 const HealthController = require('#auth/controllers/health.controller');
 
-jest.mock('@papdaew/shared', () => ({
-  PinoLogger: jest.fn(() => ({
+jest.mock('#auth/utils/logger.js', () => ({
+  getLogger: jest.fn(() => ({
     info: jest.fn(),
     error: jest.fn(),
   })),
-  asyncHandler: jest.fn(fn => fn),
 }));
 
 describe('HealthController', () => {
@@ -25,7 +24,7 @@ describe('HealthController', () => {
       info: jest.fn(),
       error: jest.fn(),
     };
-    PinoLogger.mockImplementation(() => mockLogger);
+    LoggerFactory.getLogger.mockReturnValue(mockLogger);
 
     mockReq = {};
     mockRes = {
@@ -45,7 +44,7 @@ describe('HealthController', () => {
     it('should return healthy status', async () => {
       await healthController.getHealth(mockReq, mockRes, mockNext);
 
-      expect(mockLogger.info).toHaveBeenCalledWith('GET: /health');
+      expect(mockLogger.info).toHaveBeenCalledWith('GET: health');
       expect(mockRes.status).toHaveBeenCalledWith(StatusCodes.OK);
       expect(mockRes.send).toHaveBeenCalledWith(
         'Auth service is healthy and OK'
@@ -58,7 +57,7 @@ describe('HealthController', () => {
     it('should return unhealthy status', async () => {
       await healthController.error(mockReq, mockRes, mockNext);
 
-      expect(mockLogger.error).toHaveBeenCalledWith('GET: /error');
+      expect(mockLogger.error).toHaveBeenCalledWith('GET: error');
       expect(mockRes.status).toHaveBeenCalledWith(
         StatusCodes.INTERNAL_SERVER_ERROR
       );
