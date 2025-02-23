@@ -1,11 +1,11 @@
 const { asyncHandler, BadRequestError } = require('@papdaew/shared');
 const { PinoLogger } = require('@papdaew/shared/src/logger');
 const { StatusCodes } = require('http-status-codes');
+const jwt = require('jsonwebtoken');
 
 const Config = require('#auth/config.js');
 const { signupSchema, loginSchema } = require('#auth/schemas/auth.schema.js');
 const AuthService = require('#auth/services/auth.service.js');
-const generateToken = require('#auth/utils/generateToken.util.js');
 
 class AuthController {
   #authService;
@@ -23,8 +23,18 @@ class AuthController {
     });
   }
 
+  #signToken = user =>
+    jwt.sign(
+      {
+        id: user.id,
+        role: user.role,
+      },
+      this.#config.JWT_SECRET,
+      { expiresIn: this.#config.JWT_EXPIRES_IN }
+    );
+
   #setTokenCookie = (user, _req, res) => {
-    const token = generateToken(user);
+    const token = this.#signToken(user);
 
     res.cookie('token', token, {
       httpOnly: true,
