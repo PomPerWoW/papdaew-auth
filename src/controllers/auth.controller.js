@@ -1,34 +1,48 @@
 const { asyncHandler, BadRequestError } = require('@papdaew/shared');
 const { PinoLogger } = require('@papdaew/shared/src/logger');
 const { StatusCodes } = require('http-status-codes');
+const jwt = require('jsonwebtoken');
 
-const config = require('#auth/configs/config.js');
+const Config = require('#auth/config.js');
 const { signupSchema, loginSchema } = require('#auth/schemas/auth.schema.js');
 const AuthService = require('#auth/services/auth.service.js');
-const generateToken = require('#auth/utils/generateToken.js');
 
 class AuthController {
   #authService;
   #logger;
+  #config;
 
   constructor() {
     this.#authService = new AuthService();
+    this.#config = new Config();
     this.#logger = new PinoLogger({
       name: 'Auth Controller',
-      level: config.LOG_LEVEL,
-      serviceVersion: config.SERVICE_VERSION,
-      environment: config.NODE_ENV,
+      level: this.#config.LOG_LEVEL,
+      serviceVersion: this.#config.SERVICE_VERSION,
+      environment: this.#config.NODE_ENV,
     });
   }
 
-  #setTokenCookie = (user, req, res) => {
-    const token = generateToken(user);
+  #signToken = user =>
+    jwt.sign(
+      {
+        id: user.id,
+        role: user.role,
+      },
+      this.#config.JWT_SECRET,
+      { expiresIn: this.#config.JWT_EXPIRES_IN }
+    );
+
+  #setTokenCookie = (user, _req, res) => {
+    const token = this.#signToken(user);
 
     res.cookie('token', token, {
       httpOnly: true,
-      secure: config.NODE_ENV === 'production',
+      secure: this.#config.NODE_ENV === 'production',
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
+
+    return token;
   };
 
   signup = asyncHandler(async (req, res) => {
@@ -43,11 +57,12 @@ class AuthController {
 
     const user = await this.#authService.createUser(req.body);
 
-    this.#setTokenCookie(user, req, res);
+    const token = this.#setTokenCookie(user, req, res);
 
     res.status(StatusCodes.CREATED).json({
       status: 'success',
       message: 'User registered successfully',
+      token,
       data: user,
     });
   });
@@ -64,11 +79,12 @@ class AuthController {
 
     const user = await this.#authService.findUser(req.body);
 
-    this.#setTokenCookie(user, req, res);
+    const token = this.#setTokenCookie(user, req, res);
 
     res.status(StatusCodes.OK).json({
       status: 'success',
       message: 'User logged in successfully',
+      token,
       data: user,
     });
   });
@@ -76,15 +92,18 @@ class AuthController {
   googleCallback = asyncHandler(async (req, res) => {
     this.#logger.info('Google OAuth callback');
 
-    const token = generateToken(req.user);
-
-    res.cookie('token', token, {
-      httpOnly: true,
-      secure: config.NODE_ENV === 'production',
-      maxAge: 7 * 24 * 60 * 60 * 1000,
-    });
+    this.#setTokenCookie(req.user, req, res);
 
     res.redirect('/');
+  });
+
+  logout = asyncHandler(async (req, res) => {
+    this.#logger.info('POST: /logout');
+
+    res.clearCookie('token');
+    res
+      .status(StatusCodes.OK)
+      .json({ status: 'success', message: 'User logged out successfully' });
   });
 }
 

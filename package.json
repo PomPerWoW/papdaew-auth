@@ -17,7 +17,7 @@
     "build": "npm ci --only=production",
     "prepare": "husky",
     "db:migrate": "prisma migrate deploy",
-    "db:studio": "prisma studio",
+    "db:studio": "prisma studio --browser none",
     "db:generate": "prisma generate",
     "db:seed": "prisma db seed"
   },
@@ -38,7 +38,7 @@
   "homepage": "https://github.com/PomPerWoW/papdaew-auth#readme",
   "dependencies": {
     "@papdaew/shared": "^0.2.1",
-    "@prisma/client": "^6.4.0",
+    "@prisma/client": "^6.4.1",
     "bcrypt": "^5.1.1",
     "compression": "^1.8.0",
     "cors": "^2.8.5",
@@ -52,7 +52,6 @@
     "jsonwebtoken": "^9.0.2",
     "passport": "^0.7.0",
     "passport-google-oauth20": "^2.0.0",
-    "pino": "^9.6.0",
     "pm2": "^5.4.3",
     "socket.io": "^4.8.1"
   },
@@ -67,9 +66,8 @@
     "husky": "^9.1.7",
     "jest": "^29.7.0",
     "nodemon": "^3.1.9",
-    "pino-pretty": "^13.0.0",
     "prettier": "^3.5.1",
-    "prisma": "^6.4.0",
+    "prisma": "^6.4.1",
     "supertest": "^7.0.0"
   }
 }

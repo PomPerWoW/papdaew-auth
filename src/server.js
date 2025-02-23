@@ -13,23 +13,29 @@ const helmet = require('helmet');
 const hpp = require('hpp');
 const passport = require('passport');
 
-const { config } = require('#auth/configs/config.js');
-const { authRoutes } = require('#auth/routes/auth.routes.js');
-const { healthRoutes } = require('#auth/routes/health.routes.js');
+const Config = require('#auth/config.js');
+const AuthRoutes = require('#auth/routes/auth.route.js');
+const HealthRoutes = require('#auth/routes/health.route.js');
 
-require('#auth/configs/passport.js');
+require('#auth/services/passport.service.js');
 
 class AuthServer {
   #app;
   #logger;
+  #config;
+  #authRoutes;
+  #healthRoutes;
 
   constructor() {
     this.#app = express();
+    this.#config = new Config();
+    this.#authRoutes = new AuthRoutes();
+    this.#healthRoutes = new HealthRoutes();
     this.#logger = new PinoLogger({
       name: 'Auth Server',
-      level: config.LOG_LEVEL,
-      serviceVersion: config.SERVICE_VERSION,
-      environment: config.NODE_ENV,
+      level: this.#config.LOG_LEVEL,
+      serviceVersion: this.#config.SERVICE_VERSION,
+      environment: this.#config.NODE_ENV,
     });
   }
 
@@ -60,11 +66,11 @@ class AuthServer {
 
     app.use(
       session({
-        secret: config.SESSION_SECRET,
+        secret: this.#config.SESSION_SECRET,
         resave: false,
         saveUninitialized: false,
         cookie: {
-          secure: config.NODE_ENV === 'production',
+          secure: this.#config.NODE_ENV === 'production',
           maxAge: 7 * 24 * 60 * 60 * 1000,
         },
       })
@@ -74,8 +80,8 @@ class AuthServer {
   }
 
   #setupRoutes(app) {
-    app.use('', healthRoutes);
-    app.use('/api/v1/auth', authRoutes);
+    app.use('/', this.#healthRoutes.setup());
+    app.use('/api/v1/auth', this.#authRoutes.setup());
   }
 
   #setupErrorHandlers(app) {
@@ -104,8 +110,8 @@ class AuthServer {
   #startHttpServer(app) {
     const server = http.createServer(app);
 
-    server.listen(config.PORT, () => {
-      this.#logger.info(`Auth service is running on port ${config.PORT}`);
+    server.listen(this.#config.PORT, () => {
+      this.#logger.info(`Auth service is running on port ${this.#config.PORT}`);
     });
 
     process.on('uncaughtException', error => {

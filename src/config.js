@@ -18,4 +18,4 @@ class Config {
   }
 }
 
-module.exports = { config: new Config() };
+module.exports = Config;

@@ -1,5 +1,5 @@
-const Database = require('#auth/configs/database.js');
 const AuthServer = require('#auth/server.js');
+const Database = require('#auth/services/database.service.js');
 
 class Application {
   constructor() {

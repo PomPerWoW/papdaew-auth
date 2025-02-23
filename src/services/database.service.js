@@ -1,13 +1,15 @@
 const { PinoLogger } = require('@papdaew/shared');
 const { PrismaClient } = require('@prisma/client');
 
-const config = require('#auth/configs/config.js');
+const Config = require('#auth/config.js');
 
 class Database {
   #prisma;
   #logger;
+  #config;
 
   constructor() {
+    this.#config = new Config();
     this.#prisma = new PrismaClient({
       log: [
         { level: 'warn', emit: 'event' },
@@ -22,9 +24,9 @@ class Database {
 
     this.#logger = new PinoLogger({
       name: 'Database',
-      level: config.LOG_LEVEL,
-      serviceVersion: config.SERVICE_VERSION,
-      environment: config.NODE_ENV,
+      level: this.#config.LOG_LEVEL,
+      serviceVersion: this.#config.SERVICE_VERSION,
+      environment: this.#config.NODE_ENV,
     });
 
     this.#setupLogging();
