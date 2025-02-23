@@ -1,15 +1,12 @@
 const { PrismaClient } = require('@prisma/client');
-const { PinoLogger } = require('@papdaew/shared');
 
-const Config = require('#auth/configs/config.js');
+const LoggerFactory = require('#auth/utils/logger.js');
 
 class Database {
   #prisma;
   #logger;
-  #config;
 
   constructor() {
-    this.#config = new Config();
     this.#prisma = new PrismaClient({
       log: [
         { level: 'warn', emit: 'event' },
@@ -22,12 +19,7 @@ class Database {
       },
     });
 
-    this.#logger = new PinoLogger({
-      name: 'Database',
-      level: this.#config.LOG_LEVEL,
-      serviceVersion: this.#config.SERVICE_VERSION,
-      environment: this.#config.NODE_ENV,
-    });
+    this.#logger = LoggerFactory.getLogger('Database');
 
     this.#setupLogging();
   }
@@ -42,21 +34,18 @@ class Database {
     });
   };
 
-  #disconnect = () => {
-    process.once('SIGINT', async () => {
-      await this.#prisma.$disconnect();
-    });
-  };
-
   connect = async () => {
     try {
       await this.#prisma.$connect();
       this.#logger.info('Successfully connected to database');
-      this.#disconnect();
     } catch (error) {
       this.#logger.error('Failed to connect to database', error);
       throw error;
     }
+  };
+
+  disconnect = async () => {
+    await this.#prisma.$disconnect();
   };
 
   get prisma() {

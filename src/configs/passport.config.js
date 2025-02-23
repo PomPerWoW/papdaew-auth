@@ -1,7 +1,7 @@
 const { Strategy: GoogleStrategy } = require('passport-google-oauth20');
 const passport = require('passport');
-const { PinoLogger } = require('@papdaew/shared');
 
+const LoggerFactory = require('#auth/utils/logger.js');
 const AuthService = require('#auth/services/auth.service.js');
 const Database = require('#auth/configs/database.config.js');
 const Config = require('#auth/configs/config.js');
@@ -16,12 +16,7 @@ class Passport {
     this.#authService = new AuthService();
     this.#config = new Config();
     this.#database = new Database();
-    this.#logger = new PinoLogger({
-      name: 'Passport Config',
-      level: this.#config.LOG_LEVEL,
-      serviceVersion: this.#config.SERVICE_VERSION,
-      environment: this.#config.NODE_ENV,
-    });
+    this.#logger = LoggerFactory.getLogger('Passport Config');
 
     this.initialize();
   }

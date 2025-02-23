@@ -7,12 +7,9 @@ const session = require('express-session');
 const express = require('express');
 const cors = require('cors');
 const compression = require('compression');
-const {
-  globalErrorHandler,
-  NotFoundError,
-  PinoLogger,
-} = require('@papdaew/shared');
+const { globalErrorHandler, NotFoundError } = require('@papdaew/shared');
 
+const LoggerFactory = require('#auth/utils/logger.js');
 const HealthRoutes = require('#auth/routes/health.route.js');
 const AuthRoutes = require('#auth/routes/auth.route.js');
 const Config = require('#auth/configs/config.js');
@@ -21,6 +18,7 @@ require('#auth/configs/passport.config.js');
 
 class AuthServer {
   #app;
+  #server;
   #logger;
   #config;
   #authRoutes;
@@ -31,12 +29,7 @@ class AuthServer {
     this.#config = new Config();
     this.#authRoutes = new AuthRoutes();
     this.#healthRoutes = new HealthRoutes();
-    this.#logger = new PinoLogger({
-      name: 'Auth Server',
-      level: this.#config.LOG_LEVEL,
-      serviceVersion: this.#config.SERVICE_VERSION,
-      environment: this.#config.NODE_ENV,
-    });
+    this.#logger = LoggerFactory.getLogger('Auth Server');
   }
 
   setup() {
@@ -108,39 +101,15 @@ class AuthServer {
   }
 
   #startHttpServer(app) {
-    const server = http.createServer(app);
+    this.#server = http.createServer(app);
 
-    server.listen(this.#config.PORT, () => {
+    this.#server.listen(this.#config.PORT, () => {
       this.#logger.info(`Auth service is running on port ${this.#config.PORT}`);
     });
+  }
 
-    process.on('uncaughtException', error => {
-      this.#logger.error('Uncaught Exception:', error);
-      server.close(() => {
-        process.exit(1);
-      });
-    });
-
-    process.on('unhandledRejection', error => {
-      this.#logger.error(
-        'Unhandled Rejection:',
-        `${error.name}: ${error.message}`
-      );
-      server.close(() => {
-        process.exit(1);
-      });
-    });
-
-    process.on('SIGTERM', async () => {
-      this.#logger.info('SIGTERM signal received: closing HTTP server');
-      server.close(() => {
-        this.#logger.info('HTTP server closed');
-      });
-    });
-
-    process.on('SIGINT', async () => {
-      server.close();
-    });
+  close() {
+    this.#server.close();
   }
 }
 

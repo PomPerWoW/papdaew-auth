@@ -1,8 +1,8 @@
 const jwt = require('jsonwebtoken');
 const { StatusCodes } = require('http-status-codes');
-const { PinoLogger } = require('@papdaew/shared/src/logger');
 const { asyncHandler, BadRequestError } = require('@papdaew/shared');
 
+const LoggerFactory = require('#auth/utils/logger.js');
 const AuthService = require('#auth/services/auth.service.js');
 const { signupSchema, loginSchema } = require('#auth/schemas/auth.schema.js');
 const Config = require('#auth/configs/config.js');
@@ -15,12 +15,7 @@ class AuthController {
   constructor() {
     this.#authService = new AuthService();
     this.#config = new Config();
-    this.#logger = new PinoLogger({
-      name: 'Auth Controller',
-      level: this.#config.LOG_LEVEL,
-      serviceVersion: this.#config.SERVICE_VERSION,
-      environment: this.#config.NODE_ENV,
-    });
+    this.#logger = LoggerFactory.getLogger('Auth Controller');
   }
 
   #signToken = user =>
@@ -46,7 +41,7 @@ class AuthController {
   };
 
   signup = asyncHandler(async (req, res) => {
-    this.#logger.info('POST: /signup');
+    this.#logger.info('POST: signup');
 
     const { error } = signupSchema.validate(req.body);
 
@@ -68,7 +63,7 @@ class AuthController {
   });
 
   login = asyncHandler(async (req, res) => {
-    this.#logger.info('POST: /login');
+    this.#logger.info('POST: login');
 
     const { error } = loginSchema.validate(req.body);
 
@@ -98,12 +93,41 @@ class AuthController {
   });
 
   logout = asyncHandler(async (req, res) => {
-    this.#logger.info('POST: /logout');
+    this.#logger.info('POST: logout');
 
     res.clearCookie('token');
     res
       .status(StatusCodes.OK)
       .json({ status: 'success', message: 'User logged out successfully' });
+  });
+
+  verifyEmail = asyncHandler(async (req, res) => {
+    this.#logger.info('PUT: verify email');
+
+    const user = await this.#authService.verifyEmail(req.params.token);
+
+    res.status(StatusCodes.OK).json({
+      status: 'success',
+      message: 'Email verified successfully',
+      data: user,
+    });
+  });
+
+  resendVerificationEmail = asyncHandler(async (req, res) => {
+    this.#logger.info('POST: resend verification email');
+
+    const { email } = req.body;
+
+    if (!email) {
+      throw new BadRequestError('Email is required');
+    }
+
+    const result = await this.#authService.resendVerificationEmail(email);
+
+    res.status(StatusCodes.OK).json({
+      status: 'success',
+      message: result.message,
+    });
   });
 }
 

@@ -1,29 +1,22 @@
 const { StatusCodes } = require('http-status-codes');
-const { PinoLogger, asyncHandler } = require('@papdaew/shared');
+const { asyncHandler } = require('@papdaew/shared');
 
-const Config = require('#auth/configs/config.js');
+const LoggerFactory = require('#auth/utils/logger.js');
 
 class HealthController {
   #logger;
-  #config;
 
   constructor() {
-    this.#config = new Config();
-    this.#logger = new PinoLogger({
-      name: 'Health Controller',
-      level: this.#config.LOG_LEVEL,
-      serviceVersion: this.#config.SERVICE_VERSION,
-      environment: this.#config.NODE_ENV,
-    });
+    this.#logger = LoggerFactory.getLogger('Health Controller');
   }
 
-  getHealth = asyncHandler(async (req, res) => {
-    this.#logger.info('GET: /health');
+  getHealth = asyncHandler(async (_req, res) => {
+    this.#logger.info('GET: health');
     res.status(StatusCodes.OK).send('Auth service is healthy and OK');
   });
 
-  error = asyncHandler(async (req, res) => {
-    this.#logger.error('GET: /error');
+  error = asyncHandler(async (_req, res) => {
+    this.#logger.error('GET: error');
     res
       .status(StatusCodes.INTERNAL_SERVER_ERROR)
       .send('Auth service is unhealthy');
