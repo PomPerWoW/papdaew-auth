@@ -17,7 +17,7 @@ const Config = require('#auth/config.js');
 const { authRoutes } = require('#auth/routes/auth.route.js');
 const { healthRoutes } = require('#auth/routes/health.route.js');
 
-require('#auth/passport.js');
+require('#auth/services/passport.service.js');
 
 class AuthServer {
   #app;

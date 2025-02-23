@@ -3,7 +3,7 @@ const { PinoLogger } = require('@papdaew/shared');
 const bcrypt = require('bcrypt');
 
 const Config = require('#auth/config.js');
-const Database = require('#auth/database.js');
+const Database = require('#auth/services/database.service.js');
 
 class AuthService {
   #database;
