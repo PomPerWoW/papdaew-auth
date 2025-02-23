@@ -32,27 +32,27 @@ class AuthServer {
     this.#logger = LoggerFactory.getLogger('Auth Server');
   }
 
-  setup() {
+  setup = () => {
     this.#setupSecurityMiddleware(this.#app);
     this.#setupMiddleware(this.#app);
     this.#setupRoutes(this.#app);
     this.#setupErrorHandlers(this.#app);
     return this.#app;
-  }
+  };
 
-  start() {
+  start = () => {
     this.setup();
     this.#startServer(this.#app);
-  }
+  };
 
-  #setupSecurityMiddleware(app) {
+  #setupSecurityMiddleware = app => {
     app.set('trust proxy', true);
     app.use(cors());
     app.use(helmet());
     app.use(hpp());
-  }
+  };
 
-  #setupMiddleware(app) {
+  #setupMiddleware = app => {
     app.use(compression());
     app.use(express.json());
     app.use(express.urlencoded({ extended: true }));
@@ -70,14 +70,14 @@ class AuthServer {
     );
     app.use(passport.initialize());
     app.use(passport.session());
-  }
+  };
 
-  #setupRoutes(app) {
+  #setupRoutes = app => {
     app.use('/', this.#healthRoutes.setup());
     app.use('/api/v1/auth', this.#authRoutes.setup());
-  }
+  };
 
-  #setupErrorHandlers(app) {
+  #setupErrorHandlers = app => {
     app.all('*', (req, _res, next) => {
       const fullUrl = `${req.protocol}://${req.get('host')}${req.originalUrl}`;
       this.#logger.error(`${fullUrl} endpoint does not exist.`);
@@ -89,28 +89,28 @@ class AuthServer {
     });
 
     app.use(globalErrorHandler);
-  }
+  };
 
-  async #startServer(app) {
+  #startServer = app => {
     try {
       this.#startHttpServer(app);
     } catch (error) {
       this.#logger.error('Failed to start server', error);
       process.exit(1);
     }
-  }
+  };
 
-  #startHttpServer(app) {
+  #startHttpServer = app => {
     this.#server = http.createServer(app);
 
     this.#server.listen(this.#config.PORT, () => {
       this.#logger.info(`Auth service is running on port ${this.#config.PORT}`);
     });
-  }
+  };
 
-  close() {
+  close = () => {
     this.#server.close();
-  }
+  };
 }
 
 module.exports = AuthServer;

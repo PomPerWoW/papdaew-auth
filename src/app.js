@@ -10,26 +10,26 @@ class Application {
   }
 
   initialize() {
-    this.setupExceptionHandler();
-    this.server.start();
+    this.setupUncaughtException();
     this.database.connect();
     this.messageBroker.connect();
+    this.server.start();
+    this.setupUnhandledRejection();
     this.setupShutdown();
   }
 
-  setupExceptionHandler() {
+  setupUncaughtException() {
     process.once('uncaughtException', error => {
       console.error('Uncaught Exception:', error);
-      this.server.close(() => {
-        process.exit(1);
-      });
+      process.exit(1);
     });
+  }
 
+  setupUnhandledRejection() {
     process.once('unhandledRejection', error => {
       console.error('Unhandled Rejection:', `${error.name}: ${error.message}`);
-      this.server.close(() => {
-        process.exit(1);
-      });
+      this.server.close();
+      process.exit(1);
     });
   }
 
@@ -39,7 +39,6 @@ class Application {
         await this.messageBroker.disconnect();
         await this.database.disconnect();
         this.server.close();
-
         process.exit(0);
       } catch (error) {
         console.error('Error during shutdown:', error);
