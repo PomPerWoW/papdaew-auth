@@ -7,14 +7,16 @@ const session = require('express-session');
 const express = require('express');
 const cors = require('cors');
 const compression = require('compression');
-const { globalErrorHandler, NotFoundError } = require('@papdaew/shared');
+const {
+  globalErrorHandler,
+  NotFoundError,
+  PinoLogger,
+} = require('@papdaew/shared');
 
-const LoggerFactory = require('#auth/utils/logger.js');
 const HealthRoutes = require('#auth/routes/health.route.js');
 const AuthRoutes = require('#auth/routes/auth.route.js');
+const Passport = require('#auth/configs/passport.config.js');
 const Config = require('#auth/configs/config.js');
-
-require('#auth/configs/passport.config.js');
 
 class AuthServer {
   #app;
@@ -23,13 +25,17 @@ class AuthServer {
   #config;
   #authRoutes;
   #healthRoutes;
+  #passport;
 
   constructor() {
     this.#app = express();
     this.#config = new Config();
+    this.#passport = new Passport();
     this.#authRoutes = new AuthRoutes();
     this.#healthRoutes = new HealthRoutes();
-    this.#logger = LoggerFactory.getLogger('Auth Server');
+    this.#logger = new PinoLogger().child({
+      service: 'Auth Server',
+    });
   }
 
   setup = () => {
@@ -50,12 +56,8 @@ class AuthServer {
     app.use(cors());
     app.use(helmet());
     app.use(hpp());
-  };
 
-  #setupMiddleware = app => {
-    app.use(compression());
-    app.use(express.json());
-    app.use(express.urlencoded({ extended: true }));
+    this.#passport.initialize();
 
     app.use(
       session({
@@ -70,6 +72,12 @@ class AuthServer {
     );
     app.use(passport.initialize());
     app.use(passport.session());
+  };
+
+  #setupMiddleware = app => {
+    app.use(compression());
+    app.use(express.json());
+    app.use(express.urlencoded({ extended: true }));
   };
 
   #setupRoutes = app => {
@@ -108,9 +116,16 @@ class AuthServer {
     });
   };
 
-  close = () => {
-    this.#server.close();
-  };
+  close = () =>
+    new Promise((resolve, reject) => {
+      this.#server.close(err => {
+        if (err) {
+          reject(err);
+          return;
+        }
+        resolve();
+      });
+    });
 }
 
 module.exports = AuthServer;

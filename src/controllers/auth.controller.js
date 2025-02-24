@@ -1,8 +1,11 @@
 const jwt = require('jsonwebtoken');
 const { StatusCodes } = require('http-status-codes');
-const { asyncHandler, BadRequestError } = require('@papdaew/shared');
+const {
+  asyncHandler,
+  BadRequestError,
+  PinoLogger,
+} = require('@papdaew/shared');
 
-const LoggerFactory = require('#auth/utils/logger.js');
 const AuthService = require('#auth/services/auth.service.js');
 const { signupSchema, loginSchema } = require('#auth/schemas/auth.schema.js');
 const Config = require('#auth/configs/config.js');
@@ -15,7 +18,9 @@ class AuthController {
   constructor() {
     this.#authService = new AuthService();
     this.#config = new Config();
-    this.#logger = LoggerFactory.getLogger('Auth Controller');
+    this.#logger = new PinoLogger().child({
+      service: 'Auth Controller',
+    });
   }
 
   #signToken = user =>

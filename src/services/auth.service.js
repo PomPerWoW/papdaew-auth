@@ -5,9 +5,9 @@ const {
   ConflictError,
   BadRequestError,
   NotFoundError,
+  PinoLogger,
 } = require('@papdaew/shared');
 
-const LoggerFactory = require('#auth/utils/logger.js');
 const MessageBroker = require('#auth/configs/messageBroker.config.js');
 const Database = require('#auth/configs/database.config.js');
 const Config = require('#auth/configs/config.js');
@@ -22,7 +22,9 @@ class AuthService {
     this.#config = new Config();
     this.#database = new Database();
     this.#messageBroker = new MessageBroker();
-    this.#logger = LoggerFactory.getLogger('Auth Service');
+    this.#logger = new PinoLogger().child({
+      service: 'Auth Service',
+    });
   }
 
   createUser = async (userData, provider = 'local') => {
@@ -74,7 +76,7 @@ class AuthService {
         recipient: user.email,
         data: {
           username: user.username,
-          verificationUrl: `${this.#config.API_URL}/auth/verify/${verificationToken}`,
+          verificationUrl: `${this.#config.API_URL}/auth/verify-email/${verificationToken}`,
         },
       }),
       'Verification email queued successfully'
@@ -206,7 +208,7 @@ class AuthService {
         recipient: user.email,
         data: {
           username: user.username,
-          verificationUrl: `${this.#config.API_URL}/auth/verify/${verificationToken}`,
+          verificationUrl: `${this.#config.API_URL}/auth/verify-email/${verificationToken}`,
         },
       }),
       'Verification email resent successfully'

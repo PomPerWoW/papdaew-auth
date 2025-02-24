@@ -1,15 +1,26 @@
+const { PinoLogger } = require('@papdaew/shared');
+
 const AuthServer = require('#auth/server.js');
 const MessageBroker = require('#auth/configs/messageBroker.config.js');
 const Database = require('#auth/configs/database.config.js');
+const Config = require('#auth/configs/config.js');
 
 class Application {
   constructor() {
+    this.config = new Config();
+    this.appLogger = new PinoLogger({
+      name: 'Auth Application',
+      level: this.config.LOG_LEVEL,
+      serviceVersion: this.config.SERVICE_VERSION,
+      environment: this.config.NODE_ENV,
+    });
     this.server = new AuthServer();
     this.database = new Database();
     this.messageBroker = new MessageBroker();
   }
 
   initialize = () => {
+    this.appLogger.info('Initializing Auth Application');
     this.setupUncaughtException();
     this.database.connect();
     this.messageBroker.connect();
@@ -20,14 +31,14 @@ class Application {
 
   setupUncaughtException = () => {
     process.once('uncaughtException', error => {
-      console.error('Uncaught Exception:', error);
+      this.appLogger.error(`Uncaught Exception: ${error.name}`, error);
       process.exit(1);
     });
   };
 
   setupUnhandledRejection = () => {
     process.once('unhandledRejection', error => {
-      console.error('Unhandled Rejection:', `${error.name}: ${error.message}`);
+      this.appLogger.error(`Unhandled Rejection: ${error.name}`, error);
       this.server.close();
       process.exit(1);
     });
@@ -38,10 +49,10 @@ class Application {
       try {
         await this.messageBroker.disconnect();
         await this.database.disconnect();
-        this.server.close();
+        await this.server.close();
         process.exit(0);
       } catch (error) {
-        console.error('Error during shutdown:', error);
+        this.appLogger.error(`Error during shutdown: ${error.name}`, error);
         process.exit(1);
       }
     };

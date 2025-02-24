@@ -1,13 +1,13 @@
 const { StatusCodes } = require('http-status-codes');
-const { asyncHandler } = require('@papdaew/shared');
-
-const LoggerFactory = require('#auth/utils/logger.js');
+const { asyncHandler, PinoLogger } = require('@papdaew/shared');
 
 class HealthController {
   #logger;
 
   constructor() {
-    this.#logger = LoggerFactory.getLogger('Health Controller');
+    this.#logger = new PinoLogger().child({
+      service: 'Health Controller',
+    });
   }
 
   getHealth = asyncHandler(async (_req, res) => {

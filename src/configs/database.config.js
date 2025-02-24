@@ -1,6 +1,5 @@
 const { PrismaClient } = require('@prisma/client');
-
-const LoggerFactory = require('#auth/utils/logger.js');
+const { PinoLogger } = require('@papdaew/shared');
 
 class Database {
   #prisma;
@@ -22,7 +21,9 @@ class Database {
         },
       },
     });
-    this.#logger = LoggerFactory.getLogger('Database');
+    this.#logger = new PinoLogger().child({
+      service: 'Database',
+    });
     this.#setupLogging();
     Database.#instance = this;
   }

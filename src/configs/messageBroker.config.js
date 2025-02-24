@@ -1,6 +1,6 @@
 const amqp = require('amqplib');
+const { PinoLogger } = require('@papdaew/shared');
 
-const LoggerFactory = require('#auth/utils/logger.js');
 const Config = require('#auth/configs/config.js');
 
 class MessageBroker {
@@ -15,7 +15,9 @@ class MessageBroker {
       return MessageBroker.#instance;
     }
     this.#config = new Config();
-    this.#logger = LoggerFactory.getLogger('Message Broker');
+    this.#logger = new PinoLogger().child({
+      service: 'Message Broker',
+    });
     MessageBroker.#instance = this;
   }
 

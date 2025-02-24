@@ -3,6 +3,18 @@ const { StatusCodes } = require('http-status-codes');
 
 const AuthServer = require('#auth/server.js');
 
+jest.mock('@papdaew/shared', () => ({
+  ...jest.requireActual('@papdaew/shared'),
+  PinoLogger: jest.fn().mockImplementation(() => ({
+    child: jest.fn().mockReturnValue({
+      info: jest.fn(),
+      error: jest.fn(),
+      warn: jest.fn(),
+      debug: jest.fn(),
+    }),
+  })),
+}));
+
 describe('Health Check Integration Tests', () => {
   let app;
 

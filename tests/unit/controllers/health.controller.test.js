@@ -1,12 +1,15 @@
 const { StatusCodes } = require('http-status-codes');
+const { PinoLogger } = require('@papdaew/shared');
 
-const LoggerFactory = require('#auth/utils/logger.js');
 const HealthController = require('#auth/controllers/health.controller');
 
-jest.mock('#auth/utils/logger.js', () => ({
-  getLogger: jest.fn(() => ({
-    info: jest.fn(),
-    error: jest.fn(),
+jest.mock('@papdaew/shared', () => ({
+  ...jest.requireActual('@papdaew/shared'),
+  PinoLogger: jest.fn().mockImplementation(() => ({
+    child: jest.fn().mockReturnValue({
+      info: jest.fn(),
+      error: jest.fn(),
+    }),
   })),
 }));
 
@@ -24,7 +27,10 @@ describe('HealthController', () => {
       info: jest.fn(),
       error: jest.fn(),
     };
-    LoggerFactory.getLogger.mockReturnValue(mockLogger);
+
+    PinoLogger.mockImplementation(() => ({
+      child: jest.fn().mockReturnValue(mockLogger),
+    }));
 
     mockReq = {};
     mockRes = {
