@@ -25,8 +25,8 @@ class AuthRoutes {
       passport.authenticate('google', { session: false }),
       this.#authController.googleCallback
     );
-    this.#router.get('/verify-email/:token', this.#authController.verifyEmail);
-    this.#router.post(
+    this.#router.put('/verify-email/:token', this.#authController.verifyEmail);
+    this.#router.put(
       '/resend-verification-email',
       this.#authController.resendVerificationEmail
     );

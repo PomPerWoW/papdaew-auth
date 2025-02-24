@@ -119,7 +119,7 @@ class AuthController {
   });
 
   resendVerificationEmail = asyncHandler(async (req, res) => {
-    this.#logger.info('POST: resend verification email');
+    this.#logger.info('PUT: resend verification email');
 
     const { email } = req.body;
 
