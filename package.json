@@ -8,7 +8,7 @@
     "start": "NODE_ENV=production pm2 start src/app.js -i 5 --attach --watch",
     "stop": "pm2 stop all",
     "delete": "pm2 delete all",
-    "dev": "nodemon src/app.js",
+    "dev": "npm run db:migrate && nodemon src/app.js",
     "test": "NODE_ENV=test jest --coverage=true -w=1 --forceExit --detectOpenHandles --watchAll=false",
     "lint:check": "eslint 'src/**/*.js'",
     "lint:fix": "eslint 'src/**/*.js' --fix",
