@@ -26,7 +26,7 @@ class AuthRoutes {
       this.#authController.googleCallback
     );
     this.#router.get('/verify-email/:token', this.#authController.verifyEmail);
-    this.#router.post(
+    this.#router.put(
       '/resend-verification-email',
       this.#authController.resendVerificationEmail
     );
