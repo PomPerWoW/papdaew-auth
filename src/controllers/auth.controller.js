@@ -107,14 +107,12 @@ class AuthController {
   });
 
   verifyEmail = asyncHandler(async (req, res) => {
-    this.#logger.info('PUT: verify email');
+    this.#logger.info('GET: verify email');
 
-    const user = await this.#authService.verifyEmail(req.params.token);
+    await this.#authService.verifyEmail(req.params.token);
 
-    res.status(StatusCodes.OK).json({
-      status: 'success',
-      message: 'Email verified successfully',
-      data: user,
+    res.render('verify-email-success', {
+      loginUrl: `http://localhost:3000/login`,
     });
   });
 
