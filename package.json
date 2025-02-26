@@ -37,8 +37,10 @@
   },
   "homepage": "https://github.com/PomPerWoW/papdaew-auth#readme",
   "dependencies": {
-    "@papdaew/shared": "^0.2.5",
+    "@papdaew/shared": "^0.2.6",
     "@prisma/client": "^6.4.1",
+    "ajv": "^8.17.1",
+    "ajv-formats": "^3.0.1",
     "amqplib": "^0.10.5",
     "bcrypt": "^5.1.1",
     "compression": "^1.8.0",

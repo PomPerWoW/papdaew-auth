@@ -30,18 +30,6 @@ class AuthService {
     });
   }
 
-  /**
-   * Creates a new user account
-   * @param {Object} userData - User registration data
-   * @param {string} userData.email - User's email address
-   * @param {string} userData.username - User's username (optional)
-   * @param {string} userData.password - User's password (required for local provider)
-   * @param {string} userData.role - User's role (defaults to CUSTOMER)
-   * @param {string} userData.providerId - Provider-specific ID (for OAuth)
-   * @param {string} [provider='local'] - Authentication provider (local/google)
-   * @returns {Promise<Object>} Created user object
-   * @throws {ConflictError} If user already exists
-   */
   createUser = async (userData, provider = 'local') => {
     // Check if user already exists
     const existingUser = await this.#database.prisma.user.findFirst({
@@ -90,48 +78,39 @@ class AuthService {
       data: userCreateData,
     });
 
+    // Publish user creation event
+    await this.#messageBroker.publishDirect(
+      'user_creation',
+      'USER_CREATED',
+      {
+        id: user.id,
+        email: user.email,
+        username: user.username,
+        role: user.role,
+        timestamp: new Date().toISOString(),
+        version: 1,
+      },
+      'User creation event published successfully'
+    );
+
     // Publish verification email event
     await this.#messageBroker.publishDirect(
       'email_notifications',
-      JSON.stringify({
+      'EMAIL_NOTIFICATION',
+      {
         type: 'VERIFICATION',
         recipient: user.email,
         data: {
           username: user.username,
           verificationUrl: `${this.#config.API_URL}/auth/verify-email/${verificationToken}`,
         },
-      }),
+      },
       'Verification email queued successfully'
-    );
-
-    // Publish user creation event
-    await this.#messageBroker.publishDirect(
-      'user_creation',
-      JSON.stringify({
-        type: 'USER_CREATED',
-        data: {
-          id: user.id,
-          email: user.email,
-          username: user.username,
-          role: user.role,
-          provider: user.provider,
-          isVerified: user.isVerified,
-        },
-      }),
-      'User creation event published successfully'
     );
 
     return user;
   };
 
-  /**
-   * Finds and authenticates a user
-   * @param {Object} userData - User login credentials
-   * @param {string} userData.identifier - Email or username
-   * @param {string} userData.password - User's password
-   * @returns {Promise<Object>} User object if authentication successful
-   * @throws {BadRequestError} If credentials are invalid or wrong auth provider
-   */
   findUser = async userData => {
     const existingUser = await this.#database.prisma.user.findFirst({
       where: {
@@ -177,13 +156,6 @@ class AuthService {
     return user;
   };
 
-  /**
-   * Verifies a user's email address using verification token
-   * @param {string} token - Email verification token
-   * @returns {Promise<Object>} Updated user object
-   * @throws {BadRequestError} If token expired
-   * @throws {NotFoundError} If token invalid
-   */
   verifyEmail = async token => {
     const hashedToken = crypto.createHash('sha256').update(token).digest('hex');
 
@@ -226,13 +198,6 @@ class AuthService {
     return user;
   };
 
-  /**
-   * Resends verification email to user
-   * @param {string} email - User's email address
-   * @returns {Promise<Object>} Success message
-   * @throws {NotFoundError} If user not found
-   * @throws {BadRequestError} If email already verified
-   */
   resendVerificationEmail = async email => {
     const user = await this.#database.prisma.user.findUnique({
       where: { email },
@@ -264,14 +229,14 @@ class AuthService {
 
     await this.#messageBroker.publishDirect(
       'email_notifications',
-      JSON.stringify({
+      {
         type: 'VERIFICATION',
         recipient: user.email,
         data: {
           username: user.username,
           verificationUrl: `${this.#config.API_URL}/auth/verify-email/${verificationToken}`,
         },
-      }),
+      },
       'Verification email resent successfully'
     );
 
