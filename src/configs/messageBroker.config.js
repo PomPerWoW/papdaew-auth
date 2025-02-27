@@ -44,7 +44,7 @@ class MessageBroker {
 
     if (!isValid) {
       const { errors } = this.#validator;
-      this.#logger.error(`Invalid event payload for ${eventType}`, { errors });
+      this.#logger.error(errors, `Invalid event payload for ${eventType}`);
       throw new Error(
         `Invalid event payload for ${eventType}: ${JSON.stringify(errors)}`
       );
@@ -57,7 +57,7 @@ class MessageBroker {
       this.#channel = await this.#connection.createChannel();
       this.#logger.info('Successfully connected to RabbitMQ');
     } catch (error) {
-      this.#logger.error('Failed to connect to RabbitMQ', error);
+      this.#logger.error(error, 'Failed to connect to RabbitMQ');
       throw error;
     }
   };
@@ -90,7 +90,7 @@ class MessageBroker {
       this.#logger.info(logMessage || `Published message to queue ${queue}`);
       return true;
     } catch (error) {
-      this.#logger.error(`Failed to publish message to queue ${queue}`, error);
+      this.#logger.error(error, `Failed to publish message to queue ${queue}`);
       throw error;
     }
   };
@@ -119,8 +119,8 @@ class MessageBroker {
       return true;
     } catch (error) {
       this.#logger.error(
-        `Failed to publish event to exchange ${exchange}`,
-        error
+        error,
+        `Failed to publish event to exchange ${exchange}`
       );
       throw error;
     }
@@ -140,8 +140,8 @@ class MessageBroker {
           this.#channel.ack(message);
         } catch (error) {
           this.#logger.error(
-            `Error processing message from queue ${queue}`,
-            error
+            error,
+            `Error processing message from queue ${queue}`
           );
           // Reject the message without requeuing for now
           this.#channel.nack(message, false, false);
@@ -150,7 +150,7 @@ class MessageBroker {
 
       this.#logger.info(`Subscribed to direct queue ${queue}`);
     } catch (error) {
-      this.#logger.error(`Failed to subscribe to queue ${queue}`, error);
+      this.#logger.error(error, `Failed to subscribe to queue ${queue}`);
       throw error;
     }
   };
@@ -170,8 +170,8 @@ class MessageBroker {
           this.#channel.ack(message);
         } catch (error) {
           this.#logger.error(
-            `Error processing message from ${exchange}`,
-            error
+            error,
+            `Error processing message from ${exchange}`
           );
           // Reject the message without requeuing for now
           this.#channel.nack(message, false, false);
@@ -180,7 +180,7 @@ class MessageBroker {
 
       this.#logger.info(`Subscribed to ${exchange} events on queue ${queue}`);
     } catch (error) {
-      this.#logger.error(`Failed to subscribe to ${exchange}`, error);
+      this.#logger.error(error, `Failed to subscribe to ${exchange}`);
       throw error;
     }
   };

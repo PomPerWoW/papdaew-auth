@@ -30,11 +30,11 @@ class Database {
 
   #setupLogging = () => {
     this.#prisma.$on('warn', e => {
-      this.#logger.warn('Prisma Client warning', e);
+      this.#logger.warn(e, 'Prisma Client warning');
     });
 
     this.#prisma.$on('error', e => {
-      this.#logger.error('Prisma Client error', e);
+      this.#logger.error(e, 'Prisma Client error');
     });
   };
 
@@ -43,7 +43,7 @@ class Database {
       await this.#prisma.$connect();
       this.#logger.info('Successfully connected to database');
     } catch (error) {
-      this.#logger.error('Failed to connect to database', error);
+      this.#logger.error(error, 'Failed to connect to database');
       throw error;
     }
   };

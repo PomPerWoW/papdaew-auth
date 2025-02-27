@@ -51,7 +51,7 @@ class AuthController {
     const { error } = signupSchema.validate(req.body);
 
     if (error) {
-      this.#logger.error(error.message);
+      this.#logger.error(error, 'Invalid signup data');
       throw new BadRequestError(error.message);
     }
 
@@ -73,7 +73,7 @@ class AuthController {
     const { error } = loginSchema.validate(req.body);
 
     if (error) {
-      this.#logger.error(error.message);
+      this.#logger.error(error, 'Invalid login data');
       throw new BadRequestError(error.message);
     }
 

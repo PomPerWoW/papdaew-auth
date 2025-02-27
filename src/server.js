@@ -107,7 +107,7 @@ class AuthServer {
     try {
       this.#startHttpServer(app);
     } catch (error) {
-      this.#logger.error('Failed to start server', error);
+      this.#logger.error(error, 'Failed to start server');
       process.exit(1);
     }
   };
