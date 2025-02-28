@@ -1,13 +1,11 @@
 const USER_CREATED = {
   type: 'object',
-  required: ['id', 'email', 'username', 'role', 'timestamp', 'version'],
+  required: ['id', 'email', 'username', 'role'],
   properties: {
     id: { type: 'string' },
     email: { type: 'string', format: 'email' },
     username: { type: 'string' },
     role: { type: 'string', enum: ['CUSTOMER', 'VENDOR', 'ADMIN'] },
-    timestamp: { type: 'string', format: 'date-time' },
-    version: { type: 'integer', minimum: 1 },
   },
 };
 
@@ -29,7 +27,6 @@ const EMAIL_NOTIFICATION = {
         orderDetails: { type: 'object' },
       },
     },
-    timestamp: { type: 'string', format: 'date-time' },
   },
 };
 

@@ -47,28 +47,51 @@ class Passport {
         },
         async (accessToken, refreshToken, profile, done) => {
           try {
-            const user = await this.#authService.createUser(
-              {
-                email: profile.emails[0].value,
-                firstName: profile.name.givenName,
-                lastName: profile.name.familyName,
-                picture: profile.photos[0].value,
-                providerId: profile.id,
-              },
+            // Extract user data from profile
+            const email = profile.emails[0].value;
+            const firstName = profile.name.givenName;
+            const lastName = profile.name.familyName;
+            const profileImage = profile.photos[0].value;
+
+            // Try to find existing user
+            const user = await this.#authService.findUserByEmail(email);
+
+            if (user) {
+              // User exists - check provider
+              if (user.provider === 'google') {
+                // Existing Google user - just return the user (login)
+                this.#logger.info('Existing Google user - login');
+                return done(null, user);
+              }
+              // Existing local user - you can either:
+              // Option 1: Link accounts automatically
+              // user = await this.#authService.linkGoogleAccount(user.id, profile.id);
+              // return done(null, user);
+
+              // Option 2: Reject with message to link accounts manually
+              this.#logger.info('Existing local user - link accounts manually');
+              return done(null, false, {
+                message:
+                  'An account with this email already exists. Please log in with your password and then link your Google account.',
+              });
+            }
+
+            // New user - create account
+            const userData = {
+              email,
+              firstName,
+              lastName,
+              profileImage,
+              providerId: profile.id,
+            };
+
+            const newUser = await this.#authService.createUser(
+              userData,
               'google'
             );
 
-            return done(null, user);
+            return done(null, newUser);
           } catch (error) {
-            if (error.name === 'ConflictError') {
-              const existingUser = await this.#authService.findUserByEmail(
-                profile.emails[0].value
-              );
-
-              return done(null, existingUser);
-            }
-
-            this.#logger.error('Google authentication error:', error);
             return done(error);
           }
         }

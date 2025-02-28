@@ -41,32 +41,59 @@ class AuthService {
       },
     });
 
-    // If user already exists, check if provider is google to avoid conflict
+    // If user already exists, handle based on provider
     if (existingUser) {
+      this.#logger.info(
+        `User with email ${userData.email} already exists with provider: ${existingUser.provider}`
+      );
+
+      // Case 1: OAuth sign-up with existing OAuth account - allow login
       if (provider === 'google' && existingUser.provider === 'google') {
-        return existingUser;
+        this.#logger.info('Existing Google user - login');
+        return existingUser; // Return existing user (login)
       }
-      this.#logger.error('User already exists');
-      throw new ConflictError('User already exists');
+
+      // Case 2: OAuth sign-up with existing local account - link accounts
+      if (provider === 'google' && existingUser.provider === 'local') {
+        this.#logger.error('Existing local user - link accounts manually');
+        throw new ConflictError(
+          'An account with this email already exists. Please log in with your password and then link your Google account.'
+        );
+      }
+
+      this.#logger.error('Existing account - reject');
+      // Case 3: Local sign-up with existing account - reject
+      throw new ConflictError(
+        'An account with this email already exists. Please log in or use the forgot password feature.'
+      );
     }
 
-    // Generate email verification token
-    const verificationToken = crypto.randomBytes(32).toString('hex');
-    const hashedToken = crypto
-      .createHash('sha256')
-      .update(verificationToken)
-      .digest('hex');
-
-    // Create user data
+    // Create user data with different handling based on provider
     const userCreateData = {
       email: userData.email,
       username: userData.username || userData.email.split('@')[0],
       role: userData.role || 'CUSTOMER',
       provider,
       providerId: userData.providerId,
-      verificationToken: hashedToken,
-      verificationTokenExpires: new Date(Date.now() + 24 * 60 * 60 * 1000),
     };
+
+    // For OAuth providers, mark email as already verified
+    if (provider !== 'local') {
+      userCreateData.isVerified = true;
+      // No verification token needed for OAuth users
+    } else {
+      // For local provider, generate verification token and set email as unverified
+      const verificationToken = crypto.randomBytes(32).toString('hex');
+      const hashedToken = crypto
+        .createHash('sha256')
+        .update(verificationToken)
+        .digest('hex');
+
+      userCreateData.verificationToken = hashedToken;
+      userCreateData.verificationTokenExpires = new Date(
+        Date.now() + 24 * 60 * 60 * 1000
+      );
+    }
 
     // Hash password if using local provider
     if (provider === 'local') {
@@ -87,26 +114,31 @@ class AuthService {
         email: user.email,
         username: user.username,
         role: user.role,
-        timestamp: new Date().toISOString(),
-        version: 1,
       },
       'User creation event published successfully'
     );
 
-    // Publish verification email event
-    await this.#messageBroker.publishDirect(
-      'email_notifications',
-      'EMAIL_NOTIFICATION',
-      {
-        type: 'VERIFICATION',
-        recipient: user.email,
-        data: {
-          username: user.username,
-          verificationUrl: `${this.#config.API_URL}/auth/verify-email/${verificationToken}`,
+    // Only send verification email for local provider
+    if (provider === 'local') {
+      // Publish verification email event
+      await this.#messageBroker.publishDirect(
+        'email_notifications',
+        'EMAIL_NOTIFICATION',
+        {
+          type: 'VERIFICATION',
+          recipient: user.email,
+          data: {
+            username: user.username,
+            verificationUrl: `${this.#config.API_URL}/auth/verify-email/${user.verificationToken}`,
+          },
         },
-      },
-      'Verification email queued successfully'
-    );
+        'Email notification event published successfully'
+      );
+    } else {
+      this.#logger.info(
+        `User created with ${provider} OAuth - email already verified`
+      );
+    }
 
     return user;
   };
@@ -151,6 +183,14 @@ class AuthService {
 
     const user = await this.#database.prisma.user.findUnique({
       where: { id: existingUser.id },
+    });
+
+    return user;
+  };
+
+  findUserByEmail = async email => {
+    const user = await this.#database.prisma.user.findUnique({
+      where: { email },
     });
 
     return user;
