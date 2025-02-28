@@ -44,7 +44,7 @@ class AuthService {
     // If user already exists, handle based on provider
     if (existingUser) {
       this.#logger.info(
-        `User with email ${userData.email} already exists with provider: ${existingUser.provider}`
+        `User with username ${userData.username} or email ${userData.email} already exists with provider: ${existingUser.provider}`
       );
 
       // Case 1: OAuth sign-up with existing OAuth account - allow login
@@ -64,7 +64,7 @@ class AuthService {
       this.#logger.error('Existing account - reject');
       // Case 3: Local sign-up with existing account - reject
       throw new ConflictError(
-        'An account with this email already exists. Please log in or use the forgot password feature.'
+        'An account with this username or email already exists. Please log in or use the forgot password feature.'
       );
     }
 
