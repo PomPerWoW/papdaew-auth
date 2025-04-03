@@ -77,8 +77,8 @@ class AuthService {
       providerId: userData.providerId,
     };
 
-    // For OAuth providers, mark email as already verified
     if (provider !== 'local') {
+      // For OAuth providers, mark email as already verified
       userCreateData.isVerified = true;
       // No verification token needed for OAuth users
     } else {
@@ -93,10 +93,23 @@ class AuthService {
       userCreateData.verificationTokenExpires = new Date(
         Date.now() + 24 * 60 * 60 * 1000
       );
-    }
 
-    // Hash password if using local provider
-    if (provider === 'local') {
+      // Send the unhashed token to the user
+      await this.#messageBroker.publishDirect(
+        'email_notifications',
+        'EMAIL_NOTIFICATION',
+        {
+          type: 'VERIFICATION',
+          recipient: userCreateData.email,
+          data: {
+            username: userCreateData.username,
+            verificationUrl: `${this.#config.API_URL}/auth/verify-email/${verificationToken}`,
+          },
+        },
+        'Email notification event published successfully'
+      );
+
+      // Hash password if using local provider
       userCreateData.password = await bcrypt.hash(userData.password, 10);
     }
 
@@ -120,19 +133,8 @@ class AuthService {
 
     // Only send verification email for local provider
     if (provider === 'local') {
-      // Publish verification email event
-      await this.#messageBroker.publishDirect(
-        'email_notifications',
-        'EMAIL_NOTIFICATION',
-        {
-          type: 'VERIFICATION',
-          recipient: user.email,
-          data: {
-            username: user.username,
-            verificationUrl: `${this.#config.API_URL}/auth/verify-email/${user.verificationToken}`,
-          },
-        },
-        'Email notification event published successfully'
+      this.#logger.info(
+        `User created with local provider - verification email sent`
       );
     } else {
       this.#logger.info(
@@ -269,6 +271,7 @@ class AuthService {
 
     await this.#messageBroker.publishDirect(
       'email_notifications',
+      'EMAIL_NOTIFICATION',
       {
         type: 'VERIFICATION',
         recipient: user.email,
