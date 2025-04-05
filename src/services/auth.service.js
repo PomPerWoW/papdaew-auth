@@ -163,7 +163,7 @@ class AuthService {
     }
 
     if (existingUser.provider === 'local') {
-      const isPasswordValid = bcrypt.compare(
+      const isPasswordValid = await bcrypt.compare(
         userData.password,
         existingUser.password
       );
