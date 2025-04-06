@@ -127,6 +127,7 @@ class AuthService {
         email: user.email,
         username: user.username,
         role: user.role,
+        ...userCreateData,
       },
       'User creation event published successfully'
     );

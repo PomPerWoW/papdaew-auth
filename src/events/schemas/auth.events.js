@@ -5,7 +5,11 @@ const USER_CREATED = {
     id: { type: 'string' },
     email: { type: 'string', format: 'email' },
     username: { type: 'string' },
-    role: { type: 'string', enum: ['CUSTOMER', 'VENDOR', 'ADMIN'] },
+    role: { type: 'string', enum: ['CUSTOMER', 'VENDOR', 'ADMIN', 'STAFF'] },
+    vendorId: { type: 'string' },
+    isRoot: { type: 'boolean' },
+    position: { type: 'string' },
+    branchId: { type: 'string' },
   },
 };
 
